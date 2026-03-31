@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "id": "lightbr",
+  "version": "${version}",
+  "name": "LightBR",
+  "description": "Mod for testing",
+  "authors": [],
+  "contact": {},
+  "license": "All-Rights-Reserved",
+  "icon": "assets/lightbr/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "org.wengdev.lightbr.LightBR"
+    ],
+    "modmenu": [
+      "org.wengdev.lightbr.config.ModMenuEntrypoint"
+    ]
+  },
+  "mixins": [
+    "lightbr.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric-api": "*",
+    "minecraft": "${minecraft_version}",
+    "yet_another_config_lib_v3": ">=${yacl_version}"
+  },
+  "suggests": {
+    "modmenu": ">=${modmenu_version}",
+    "sodium": ">=${sodium_version}",
+    "openboatutils": ">=${obu_version}"
+  }
+}

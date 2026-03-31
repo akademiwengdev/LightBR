@@ -1,0 +1,19 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "org.wengdev.lightbr.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "plugin": "org.wengdev.lightbr.plugin.LightBRMixinPlugin",
+  "client": [
+    "BlockEntityRenderDispatcherMixin",
+    "BlockRenderManagerMixin",
+    "sodium.SodiumBlockRendererMixin",
+    "obu.OBUMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "overwrites": {
+    "requireAnnotations": true
+  }
+}
