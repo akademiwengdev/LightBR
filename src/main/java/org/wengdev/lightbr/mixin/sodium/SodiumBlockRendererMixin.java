@@ -14,7 +14,6 @@ import org.wengdev.lightbr.RenderChecker;
 
 @Mixin(BlockRenderer.class)
 public class SodiumBlockRendererMixin {
-
     @Inject(method = "renderModel", at = @At("HEAD"), cancellable = true, remap = false)
     private void onRenderModel(BakedModel model, BlockState state, BlockPos pos, BlockPos origin, CallbackInfo ci) {
         ClientWorld world = MinecraftClient.getInstance().world;

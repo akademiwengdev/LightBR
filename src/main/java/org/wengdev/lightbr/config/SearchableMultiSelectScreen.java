@@ -14,7 +14,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
-import java.util.function.Function;
 
 public class SearchableMultiSelectScreen extends Screen {
     private static final int PADDING = 20;
