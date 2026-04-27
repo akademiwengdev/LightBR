@@ -35,10 +35,6 @@ public class RenderChecker {
             return LightBR.config.blocksOnlySelectedBlocks.contains(blockId);
         }
 
-        if (LightBR.config.unrenderNoCollisionBlocks && state.getCollisionShape(world, pos).isEmpty()) {
-            return false;
-        }
-
         long chunkKey = TrackCache.toChunkKey(pos);
         int sectionY = TrackCache.toSectionY(pos.getY());
         return TrackCache.shouldRenderChunk(chunkKey, sectionY);
