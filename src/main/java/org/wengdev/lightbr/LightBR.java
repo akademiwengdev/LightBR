@@ -13,12 +13,14 @@ public class LightBR implements ClientModInitializer {
     public static LightBRConfig config;
     public static HashMap<String, Float> defaultSlipperinessMap = null;
 
+    private static final float DEFAULT_BLOCK_SLIPPERINESS = 0.6f;
+
     public static HashMap<String, Float> loadDefaultSlipperinessMap() {
         if (defaultSlipperinessMap == null) {
             defaultSlipperinessMap = new HashMap<>();
 
             for (Block b : Registries.BLOCK.stream().toList()) {
-                if (b.getSlipperiness() != 0.6f) {
+                if (b.getSlipperiness() != DEFAULT_BLOCK_SLIPPERINESS) {
                     defaultSlipperinessMap.put(Registries.BLOCK.getId(b).toString(), b.getSlipperiness());
                 }
             }

@@ -99,7 +99,7 @@ public class SearchableMultiSelectScreen extends Screen {
         }
 
         int maxOffset = Math.max(0, this.filteredIds.size() - this.getVisibleRowCount());
-        this.scrollOffset = Math.max(0, Math.min(this.scrollOffset, maxOffset));
+        this.scrollOffset = Math.clamp(this.scrollOffset, 0, maxOffset);
     }
 
     private int getVisibleRowCount() {
