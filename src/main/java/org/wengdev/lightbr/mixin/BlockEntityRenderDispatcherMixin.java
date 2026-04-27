@@ -19,7 +19,7 @@ public class BlockEntityRenderDispatcherMixin {
             return;
         }
 
-        if (LightBR.config.unrenderNoCollisionBlocks) {
+        if (LightBR.config.shouldUnrenderBlockEntities) {
             String blockId = Registries.BLOCK.getId(blockEntity.getCachedState().getBlock()).toString();
             if (LightBR.config.renderableBlockEntities.contains(blockId)) {
                 return;

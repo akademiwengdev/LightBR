@@ -83,12 +83,12 @@ public class YACLConfigScreen extends YACLScreen {
         );
 
         generalGroup.option(Option.<Boolean>createBuilder()
-                .name(Text.literal("Un-render No-Collision Blocks"))
-                .description(OptionDescription.of(Text.literal("Whether blocks without a collision shape should be un-rendered or not.")))
+                .name(Text.literal("Un-render Block Entities"))
+                .description(OptionDescription.of(Text.literal("Whether block entities should be un-rendered or not.")))
                 .binding(
                         true,
-                        () -> LightBR.config.unrenderNoCollisionBlocks,
-                        newValue -> LightBR.config.unrenderNoCollisionBlocks = newValue
+                        () -> LightBR.config.shouldUnrenderBlockEntities,
+                        newValue -> LightBR.config.shouldUnrenderBlockEntities = newValue
                 )
                 .controller(TickBoxControllerBuilder::create)
                 .build()

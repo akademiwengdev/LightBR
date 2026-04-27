@@ -71,8 +71,8 @@ public class LightBRConfig {
     @SerializedName("render_lava")
     public boolean renderAllLava = true;
 
-    @SerializedName("unrender_no_collision_blocks")
-    public boolean unrenderNoCollisionBlocks = true;
+    @SerializedName("should_unrender_block_entities")
+    public boolean shouldUnrenderBlockEntities = true;
 
     @SerializedName("render_mode")
     public RenderMode renderMode = RenderMode.NEARBY_CHUNKS;
