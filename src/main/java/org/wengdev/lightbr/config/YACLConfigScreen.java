@@ -6,19 +6,14 @@ import dev.isxander.yacl3.api.Option;
 import dev.isxander.yacl3.api.OptionDescription;
 import dev.isxander.yacl3.api.OptionGroup;
 import dev.isxander.yacl3.api.YetAnotherConfigLib;
-import dev.isxander.yacl3.api.controller.EnumControllerBuilder;
 import dev.isxander.yacl3.api.controller.TickBoxControllerBuilder;
 import dev.isxander.yacl3.gui.YACLScreen;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockEntityProvider;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
 import org.wengdev.lightbr.LightBR;
+import org.wengdev.lightbr.Utils;
 
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 public class YACLConfigScreen extends YACLScreen {
@@ -84,9 +79,9 @@ public class YACLConfigScreen extends YACLScreen {
 
         generalGroup.option(Option.<Boolean>createBuilder()
                 .name(Text.literal("Un-render Block Entities"))
-                .description(OptionDescription.of(Text.literal("Whether block entities should be un-rendered or not.")))
+                .description(OptionDescription.of(Text.literal("Whether block entities should be un-rendered or not.\nIf enabled, only block entities in the 'Renderable Block Entities' list will be rendered.")))
                 .binding(
-                        true,
+                        false,
                         () -> LightBR.config.shouldUnrenderBlockEntities,
                         newValue -> LightBR.config.shouldUnrenderBlockEntities = newValue
                 )
@@ -105,11 +100,11 @@ public class YACLConfigScreen extends YACLScreen {
                 .name(Text.literal("Renderable Block Entities"))
                 .text(Text.literal("Open Selector"))
                 .description(OptionDescription.of(Text.literal(
-                        "Pick blocks with block entities to keep rendering when 'Un-render No-Collision Blocks' is enabled. "
+                        "Pick blocks with block entities to keep rendering when 'Un-render Block Entities' is enabled. "
                                 + "Includes search and multi-select."
                 )))
                 .action((screen, option) -> {
-                    List<String> options = getBlockEntityBackedBlockIds();
+                    List<String> options = Utils.getBlockEntityBackedBlockIds();
                     MinecraftClient.getInstance().setScreen(new SearchableMultiSelectScreen(
                             screen,
                             Text.literal("Renderable Block Entities"),
@@ -124,29 +119,5 @@ public class YACLConfigScreen extends YACLScreen {
         );
 
         return renderGroup.build();
-    }
-
-    private static List<String> getBlockEntityBackedBlockIds() {
-        List<String> ids = new ArrayList<>();
-
-        for (Block block : Registries.BLOCK) {
-            if (block instanceof BlockEntityProvider || block.getDefaultState().hasBlockEntity()) {
-                ids.add(Registries.BLOCK.getId(block).toString());
-            }
-        }
-
-        ids.sort(Comparator.naturalOrder());
-        return ids;
-    }
-
-    private static List<String> getAllBlockIds() {
-        List<String> ids = new ArrayList<>();
-
-        for (Block block : Registries.BLOCK) {
-            ids.add(Registries.BLOCK.getId(block).toString());
-        }
-
-        ids.sort(Comparator.naturalOrder());
-        return ids;
     }
 }

@@ -4,6 +4,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.SerializedName;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.registry.Registries;
+import org.wengdev.lightbr.Utils;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -15,50 +17,7 @@ import java.util.List;
 public class LightBRConfig {
     private static final Path CONFIG_PATH = Path.of("config", "lightbr_config.json");
 
-    static final List<String> DEFAULT_RENDERABLE_BLOCK_ENTITIES = List.of(
-            "minecraft:chest",
-            "minecraft:trapped_chest",
-            "minecraft:ender_chest",
-            "minecraft:enchanting_table",
-            "minecraft:skull",
-            "minecraft:brewing_stand",
-            "minecraft:shulker_box",
-            "minecraft:white_shulker_box",
-            "minecraft:orange_shulker_box",
-            "minecraft:magenta_shulker_box",
-            "minecraft:light_blue_shulker_box",
-            "minecraft:yellow_shulker_box",
-            "minecraft:lime_shulker_box",
-            "minecraft:pink_shulker_box",
-            "minecraft:gray_shulker_box",
-            "minecraft:light_gray_shulker_box",
-            "minecraft:cyan_shulker_box",
-            "minecraft:purple_shulker_box",
-            "minecraft:blue_shulker_box",
-            "minecraft:brown_shulker_box",
-            "minecraft:green_shulker_box",
-            "minecraft:red_shulker_box",
-            "minecraft:black_shulker_box",
-            "minecraft:furnace",
-            "minecraft:blast_furnace",
-            "minecraft:smoker",
-            "minecraft:white_bed",
-            "minecraft:orange_bed",
-            "minecraft:magenta_bed",
-            "minecraft:light_blue_bed",
-            "minecraft:yellow_bed",
-            "minecraft:lime_bed",
-            "minecraft:pink_bed",
-            "minecraft:gray_bed",
-            "minecraft:light_gray_bed",
-            "minecraft:cyan_bed",
-            "minecraft:purple_bed",
-            "minecraft:blue_bed",
-            "minecraft:brown_bed",
-            "minecraft:green_bed",
-            "minecraft:red_bed",
-            "minecraft:black_bed"
-    );
+    static final List<String> DEFAULT_RENDERABLE_BLOCK_ENTITIES = Utils.getBlockEntityBackedBlockIds();
 
     @SerializedName("is_enabled")
     public boolean isEnabled = false;
