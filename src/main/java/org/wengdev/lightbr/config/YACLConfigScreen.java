@@ -101,21 +101,6 @@ public class YACLConfigScreen extends YACLScreen {
         final OptionGroup.Builder renderGroup = OptionGroup.createBuilder();
         renderGroup.name(Text.literal("Render Settings"));
 
-        renderGroup.option(Option.<RenderMode>createBuilder()
-                .name(Text.literal("Render Mode"))
-                .description(OptionDescription.of(Text.literal(
-                        "NEARBY_CHUNKS: Renders chunks within 1 chunk radius of slippery (ice/OBU) blocks. "
-                                + "BLOCKS_ONLY: Only renders the slippery blocks themselves, everything else is hidden. Lighter on performance."
-                )))
-                .binding(
-                        RenderMode.NEARBY_CHUNKS,
-                        () -> LightBR.config.renderMode,
-                        newValue -> LightBR.config.renderMode = newValue
-                )
-                .controller(renderModeOption -> EnumControllerBuilder.create(renderModeOption).enumClass(RenderMode.class))
-                .build()
-        );
-
         renderGroup.option(ButtonOption.createBuilder()
                 .name(Text.literal("Renderable Block Entities"))
                 .text(Text.literal("Open Selector"))
@@ -130,28 +115,6 @@ public class YACLConfigScreen extends YACLScreen {
                             Text.literal("Renderable Block Entities"),
                             options,
                             LightBR.config.renderableBlockEntities,
-                            () -> {
-                                LightBR.config.saveAndReloadWorld();
-                            }
-                    ));
-                })
-                .build()
-        );
-
-        renderGroup.option(ButtonOption.createBuilder()
-                .name(Text.literal("BLOCKS_ONLY - Rendered Blocks"))
-                .text(Text.literal("Open Selector"))
-                .description(OptionDescription.of(Text.literal(
-                        "Pick extra blocks to render in BLOCKS_ONLY mode in addition to slippery blocks. "
-                                + "Includes search and multi-select."
-                )))
-                .action((screen, option) -> {
-                    List<String> options = getAllBlockIds();
-                    MinecraftClient.getInstance().setScreen(new SearchableMultiSelectScreen(
-                            screen,
-                            Text.literal("BLOCKS_ONLY - Rendered Blocks"),
-                            options,
-                            LightBR.config.blocksOnlySelectedBlocks,
                             () -> {
                                 LightBR.config.saveAndReloadWorld();
                             }

@@ -60,8 +60,6 @@ public class LightBRConfig {
             "minecraft:black_bed"
     );
 
-    static final List<String> DEFAULT_BLOCKS_ONLY_SELECTED_BLOCKS = List.of();
-
     @SerializedName("is_enabled")
     public boolean isEnabled = false;
 
@@ -74,14 +72,8 @@ public class LightBRConfig {
     @SerializedName("should_unrender_block_entities")
     public boolean shouldUnrenderBlockEntities = true;
 
-    @SerializedName("render_mode")
-    public RenderMode renderMode = RenderMode.NEARBY_CHUNKS;
-
     @SerializedName("renderable_block_entities")
     public List<String> renderableBlockEntities = new ArrayList<>(DEFAULT_RENDERABLE_BLOCK_ENTITIES);
-
-    @SerializedName("blocks_only_selected_blocks")
-    public List<String> blocksOnlySelectedBlocks = new ArrayList<>(DEFAULT_BLOCKS_ONLY_SELECTED_BLOCKS);
 
     public void save() {
         try {
@@ -108,12 +100,6 @@ public class LightBRConfig {
                 LightBRConfig config = gson.fromJson(json, LightBRConfig.class);
                 if (config.renderableBlockEntities == null) {
                     config.renderableBlockEntities = new ArrayList<>(DEFAULT_RENDERABLE_BLOCK_ENTITIES);
-                }
-                if (config.blocksOnlySelectedBlocks == null) {
-                    config.blocksOnlySelectedBlocks = new ArrayList<>(DEFAULT_BLOCKS_ONLY_SELECTED_BLOCKS);
-                }
-                if (config.renderMode == null) {
-                    config.renderMode = RenderMode.NEARBY_CHUNKS;
                 }
                 return config;
             }
