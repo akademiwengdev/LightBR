@@ -7,3 +7,5 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
+
+include(":compat-api", ":compat-obu-legacy", ":compat-obu-latest")

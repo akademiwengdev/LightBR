@@ -18,7 +18,9 @@
     ]
   },
   "mixins": [
-    "lightbr.mixins.json"
+    "lightbr.mixins.json",
+    "lightbr.obu-legacy.mixins.json",
+    "lightbr.obu-latest.mixins.json"
   ],
   "depends": {
     "fabricloader": ">=${loader_version}",

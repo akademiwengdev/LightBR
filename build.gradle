@@ -3,6 +3,10 @@ plugins {
     id 'maven-publish'
 }
 
+evaluationDependsOn(":compat-api")
+evaluationDependsOn(":compat-obu-legacy")
+evaluationDependsOn(":compat-obu-latest")
+
 version = project.mod_version
 group = project.maven_group
 
@@ -49,9 +53,11 @@ dependencies {
 
     modCompileOnly "maven.modrinth:sodium:${project.sodium_version}"
     modLocalRuntime "maven.modrinth:sodium:${project.sodium_version}"
+    modCompileOnly "maven.modrinth:openboatutils:${project.obu_legacy_version}"
 
-    modCompileOnly "maven.modrinth:openboatutils:${project.obu_version}"
-    modLocalRuntime "maven.modrinth:openboatutils:${project.obu_version}"
+    implementation project(":compat-api")
+    implementation project(":compat-obu-legacy")
+    implementation project(":compat-obu-latest")
 }
 
 processResources {
@@ -98,6 +104,23 @@ jar {
     from("LICENSE") {
         rename { "${it}_${project.archives_base_name}" }
     }
+    def compatApiJar = project(":compat-api").tasks.named("jar")
+    def compatLegacyJar = project(":compat-obu-legacy").tasks.named("jar")
+    def compatLatestJar = project(":compat-obu-latest").tasks.named("jar")
+
+    from(compatApiJar.map { zipTree(it.archiveFile.get().asFile) })
+    from(compatLegacyJar.map { zipTree(it.archiveFile.get().asFile) })
+    from(compatLatestJar.map { zipTree(it.archiveFile.get().asFile) })
+
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+tasks.named("jar") {
+    dependsOn(
+        ":compat-api:jar",
+        ":compat-obu-legacy:jar",
+        ":compat-obu-latest:jar"
+    )
 }
 
 // configure the maven publication

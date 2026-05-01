@@ -29,11 +29,12 @@ public class LightBR implements ClientModInitializer {
         return defaultSlipperinessMap;
     }
 
-    public static HashMap<String, Float> getSlipperinessMap() {
+    public static boolean isSlipperyBlock(String blockId) {
         if (OBUManager.isOBUEnabled()) {
-            return OBUManager.getSlipperinessMap();
+            return OBUManager.isBlockSlippery(blockId);
         } else {
-            return loadDefaultSlipperinessMap();
+            HashMap<String, Float> slipperinessMap = loadDefaultSlipperinessMap();
+            return slipperinessMap.containsKey(blockId);
         }
     }
 

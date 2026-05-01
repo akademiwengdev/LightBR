@@ -25,19 +25,11 @@ public class OBUManager {
         return OBUFetcher.isIsDefaultSlipperinessSet();
     }
 
-    public static void setIsDefaultSlipperinessSet(boolean value) {
+    public static boolean isBlockSlippery(String blockId) {
         if (!isOBULoaded()) {
-            return;
+            return false;
         }
 
-        OBUFetcher.setIsDefaultSlipperinessSet(value);
-    }
-
-    public static HashMap<String, Float> getSlipperinessMap() {
-        if (!isOBULoaded()) {
-            return new HashMap<>();
-        }
-
-        return OBUFetcher.getSlipperinessMap();
+        return OBUFetcher.isBlockSlippery(blockId);
     }
 }

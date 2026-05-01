@@ -1,0 +1,14 @@
+{
+  "required": false,
+  "minVersion": "0.8",
+  "package": "org.wengdev.lightbr.compat.obu.legacy.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "plugin": "org.wengdev.lightbr.plugin.LightBRMixinPlugin",
+  "client": [
+    "OBULegacyMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
+
