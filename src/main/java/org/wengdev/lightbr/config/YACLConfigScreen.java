@@ -26,10 +26,10 @@ public class YACLConfigScreen extends YACLScreen {
         final OptionGroup renderGroup = createRenderGroup();
 
         return YetAnotherConfigLib.createBuilder()
-                .title(Text.literal("LightBR Config"))
+                .title(Text.translatable("lightbr.config.title"))
                 .category(
                         ConfigCategory.createBuilder()
-                                .name(Text.literal("LightBR"))
+                                .name(Text.translatable("lightbr.config.category"))
                                 .group(generalGroup)
                                 .group(renderGroup)
                                 .build()
@@ -42,8 +42,8 @@ public class YACLConfigScreen extends YACLScreen {
         final OptionGroup.Builder generalGroup = OptionGroup.createBuilder();
 
         generalGroup.option(Option.<Boolean>createBuilder()
-                .name(Text.literal("Enabled"))
-                .description(OptionDescription.of(Text.literal("Whether LightBR is enabled or not.")))
+                .name(Text.translatable("lightbr.config.enabled.name"))
+                .description(OptionDescription.of(Text.translatable("lightbr.config.enabled.desc")))
                 .binding(
                         false,
                         () -> LightBR.config.isEnabled,
@@ -54,8 +54,8 @@ public class YACLConfigScreen extends YACLScreen {
         );
 
         generalGroup.option(Option.<Boolean>createBuilder()
-                .name(Text.literal("Render Water"))
-                .description(OptionDescription.of(Text.literal("Whether all water should be rendered or not.")))
+                .name(Text.translatable("lightbr.config.render_water.name"))
+                .description(OptionDescription.of(Text.translatable("lightbr.config.render_water.desc")))
                 .binding(
                         true,
                         () -> LightBR.config.renderAllWater,
@@ -66,8 +66,8 @@ public class YACLConfigScreen extends YACLScreen {
         );
 
         generalGroup.option(Option.<Boolean>createBuilder()
-                .name(Text.literal("Render Lava"))
-                .description(OptionDescription.of(Text.literal("Whether all lava should be rendered or not.")))
+                .name(Text.translatable("lightbr.config.render_lava.name"))
+                .description(OptionDescription.of(Text.translatable("lightbr.config.render_lava.desc")))
                 .binding(
                         true,
                         () -> LightBR.config.renderAllLava,
@@ -78,8 +78,8 @@ public class YACLConfigScreen extends YACLScreen {
         );
 
         generalGroup.option(Option.<Boolean>createBuilder()
-                .name(Text.literal("Un-render Block Entities"))
-                .description(OptionDescription.of(Text.literal("Whether block entities should be un-rendered or not.\nIf enabled, only block entities in the 'Renderable Block Entities' list will be rendered.")))
+                .name(Text.translatable("lightbr.config.unrender_block_entities.name"))
+                .description(OptionDescription.of(Text.translatable("lightbr.config.unrender_block_entities.desc")))
                 .binding(
                         false,
                         () -> LightBR.config.shouldUnrenderBlockEntities,
@@ -94,20 +94,19 @@ public class YACLConfigScreen extends YACLScreen {
 
     private static OptionGroup createRenderGroup() {
         final OptionGroup.Builder renderGroup = OptionGroup.createBuilder();
-        renderGroup.name(Text.literal("Render Settings"));
+        renderGroup.name(Text.translatable("lightbr.config.render_group.name"));
 
         renderGroup.option(ButtonOption.createBuilder()
-                .name(Text.literal("Renderable Block Entities"))
-                .text(Text.literal("Open Selector"))
-                .description(OptionDescription.of(Text.literal(
-                        "Pick blocks with block entities to keep rendering when 'Un-render Block Entities' is enabled. "
-                                + "Includes search and multi-select."
+                .name(Text.translatable("lightbr.config.renderable_block_entities.name"))
+                .text(Text.translatable("lightbr.config.renderable_block_entities.open_selector"))
+                .description(OptionDescription.of(Text.translatable(
+                        "lightbr.config.renderable_block_entities.desc"
                 )))
                 .action((screen, option) -> {
                     List<String> options = Utils.getBlockEntityBackedBlockIds();
                     MinecraftClient.getInstance().setScreen(new SearchableMultiSelectScreen(
                             screen,
-                            Text.literal("Renderable Block Entities"),
+                            Text.translatable("lightbr.config.renderable_block_entities.title"),
                             options,
                             LightBR.config.renderableBlockEntities,
                             () -> {

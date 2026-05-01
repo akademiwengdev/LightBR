@@ -48,7 +48,7 @@ public class SearchableMultiSelectScreen extends Screen {
     @Override
     protected void init() {
         int searchWidth = this.width - (PADDING * 2);
-        this.searchField = new TextFieldWidget(this.textRenderer, PADDING, PADDING + 18, searchWidth, SEARCH_HEIGHT, Text.literal("Search"));
+        this.searchField = new TextFieldWidget(this.textRenderer, PADDING, PADDING + 18, searchWidth, SEARCH_HEIGHT, Text.translatable("lightbr.select.search"));
         this.searchField.setMaxLength(256);
         this.searchField.setChangedListener(value -> {
             this.scrollOffset = 0;
@@ -62,21 +62,21 @@ public class SearchableMultiSelectScreen extends Screen {
         int buttonGap = 8;
         int center = this.width / 2;
 
-        this.addDrawableChild(ButtonWidget.builder(Text.literal("Select All"), button -> {
+        this.addDrawableChild(ButtonWidget.builder(Text.translatable("lightbr.select.select_all"), button -> {
                     this.selectedIds.addAll(this.filteredIds);
                 })
                 .dimensions(center - (buttonWidth * 2) - (buttonGap * 2), buttonY, buttonWidth, BUTTON_HEIGHT)
                 .build());
 
-        this.addDrawableChild(ButtonWidget.builder(Text.literal("Clear"), button -> this.selectedIds.clear())
+        this.addDrawableChild(ButtonWidget.builder(Text.translatable("lightbr.select.clear"), button -> this.selectedIds.clear())
                 .dimensions(center - buttonWidth - buttonGap, buttonY, buttonWidth, BUTTON_HEIGHT)
                 .build());
 
-        this.addDrawableChild(ButtonWidget.builder(Text.literal("Done"), button -> this.applyAndClose())
+        this.addDrawableChild(ButtonWidget.builder(Text.translatable("lightbr.select.done"), button -> this.applyAndClose())
                 .dimensions(center + buttonGap, buttonY, buttonWidth, BUTTON_HEIGHT)
                 .build());
 
-        this.addDrawableChild(ButtonWidget.builder(Text.literal("Cancel"), button -> this.close())
+        this.addDrawableChild(ButtonWidget.builder(Text.translatable("lightbr.select.cancel"), button -> this.close())
                 .dimensions(center + buttonWidth + (buttonGap * 2), buttonY, buttonWidth, BUTTON_HEIGHT)
                 .build());
 
@@ -162,7 +162,7 @@ public class SearchableMultiSelectScreen extends Screen {
         super.render(context, mouseX, mouseY, delta);
 
         context.drawCenteredTextWithShadow(this.textRenderer, this.title, this.width / 2, PADDING, 0xFFFFFF);
-        context.drawText(this.textRenderer, Text.literal("Selected: " + this.selectedIds.size() + " / " + this.allIds.size()), PADDING, this.searchField.getY() - 12, 0xAAAAAA, false);
+        context.drawText(this.textRenderer, Text.translatable("lightbr.select.selected_count", this.selectedIds.size(), this.allIds.size()), PADDING, this.searchField.getY() - 12, 0xAAAAAA, false);
 
         context.fill(this.listLeft, this.listTop, this.listRight, this.listBottom, 0x66000000);
 
@@ -178,12 +178,12 @@ public class SearchableMultiSelectScreen extends Screen {
             int rowColor = selected ? 0x553C8C3C : 0x33222222;
             context.fill(this.listLeft + 1, rowY, this.listRight - 1, rowY + ROW_HEIGHT - 1, rowColor);
 
-            String prefix = selected ? "[x] " : "[ ] ";
-            context.drawText(this.textRenderer, Text.literal(prefix + id), this.listLeft + 6, rowY + 5, 0xFFFFFF, false);
+            String entryKey = selected ? "lightbr.select.entry_selected" : "lightbr.select.entry_unselected";
+            context.drawText(this.textRenderer, Text.translatable(entryKey, id), this.listLeft + 6, rowY + 5, 0xFFFFFF, false);
         }
 
         if (this.filteredIds.isEmpty()) {
-            context.drawCenteredTextWithShadow(this.textRenderer, Text.literal("No matches"), this.width / 2, this.listTop + 8, 0xAAAAAA);
+            context.drawCenteredTextWithShadow(this.textRenderer, Text.translatable("lightbr.select.no_matches"), this.width / 2, this.listTop + 8, 0xAAAAAA);
         }
     }
 }
