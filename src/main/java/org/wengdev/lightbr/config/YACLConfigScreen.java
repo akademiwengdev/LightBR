@@ -41,6 +41,19 @@ public class YACLConfigScreen extends YACLScreen {
     private static OptionGroup createGeneralGroup() {
         final OptionGroup.Builder generalGroup = OptionGroup.createBuilder();
 
+        Text serverStatus = LightBR.isServerControlled()
+                ? Text.translatable("lightbr.config.server_controlled.active")
+                : Text.translatable("lightbr.config.server_controlled.inactive");
+
+        generalGroup.option(ButtonOption.createBuilder()
+                .name(Text.translatable("lightbr.config.server_controlled.name"))
+                .text(serverStatus)
+                .description(OptionDescription.of(Text.translatable("lightbr.config.server_controlled.desc")))
+                .action((screen, option) -> {
+                })
+                .build()
+        );
+
         generalGroup.option(Option.<Boolean>createBuilder()
                 .name(Text.translatable("lightbr.config.enabled.name"))
                 .description(OptionDescription.of(Text.translatable("lightbr.config.enabled.desc")))

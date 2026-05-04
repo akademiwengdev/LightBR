@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.SerializedName;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.registry.Registries;
+import org.wengdev.lightbr.LightBR;
 import org.wengdev.lightbr.Utils;
 
 import java.io.IOException;
@@ -48,6 +48,7 @@ public class LightBRConfig {
     public void saveAndReloadWorld() {
         save();
 
+        LightBR.updateRenderContextFromConfig();
         MinecraftClient.getInstance().worldRenderer.reload();
     }
 

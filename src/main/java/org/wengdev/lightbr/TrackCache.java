@@ -8,9 +8,6 @@ import net.minecraft.util.math.ChunkSectionPos;
 import java.util.concurrent.locks.StampedLock;
 
 public class TrackCache {
-    private static final int NEARBY_CHUNK_RADIUS = 1;
-    private static final int NEARBY_SECTION_RADIUS = 1;
-
     private static final LongOpenHashSet TRACK_SECTIONS = new LongOpenHashSet();
     private static final LongOpenHashSet RENDERABLE_SECTIONS = new LongOpenHashSet();
     private static final StampedLock LOCK = new StampedLock();
@@ -25,10 +22,12 @@ public class TrackCache {
 
             int cx = ChunkPos.getPackedX(chunkKey);
             int cz = ChunkPos.getPackedZ(chunkKey);
+            int chunkRadius = getChunkRadius();
+            int sectionRadius = getSectionRadius();
 
-            for (int x = cx - NEARBY_CHUNK_RADIUS; x <= cx + NEARBY_CHUNK_RADIUS; x++) {
-                for (int y = sectionY - NEARBY_SECTION_RADIUS; y <= sectionY + NEARBY_SECTION_RADIUS; y++) {
-                    for (int z = cz - NEARBY_CHUNK_RADIUS; z <= cz + NEARBY_CHUNK_RADIUS; z++) {
+            for (int x = cx - chunkRadius; x <= cx + chunkRadius; x++) {
+                for (int y = sectionY - sectionRadius; y <= sectionY + sectionRadius; y++) {
+                    for (int z = cz - chunkRadius; z <= cz + chunkRadius; z++) {
                         RENDERABLE_SECTIONS.add(ChunkSectionPos.asLong(x, y, z));
                     }
                 }
@@ -67,6 +66,16 @@ public class TrackCache {
 
     public static long toChunkKey(int chunkX, int chunkZ) {
         return ChunkPos.toLong(chunkX, chunkZ);
+    }
+
+    private static int getChunkRadius() {
+        RenderContext context = LightBR.getRenderContext();
+        return Math.max(0, context.chunkXZRadius);
+    }
+
+    private static int getSectionRadius() {
+        RenderContext context = LightBR.getRenderContext();
+        return Math.max(0, context.chunkYRadius);
     }
 
     private static long toSectionKey(long chunkKey, int sectionY) {

@@ -18,6 +18,9 @@ public final class LatestObuCompat implements ObuCompat {
         }
 
         Float slipperiness = OpenBoatUtils.instance.getBlockSlipperiness(id);
-        return slipperiness != null && Float.compare(slipperiness, 0.6f) != 0;
+        if (slipperiness != null && Float.compare(slipperiness, 0.6f) != 0)
+            return true;
+
+        return OpenBoatUtils.instance.getBlocksWithSettings().stream().anyMatch(s -> s.equals(id));
     }
 }

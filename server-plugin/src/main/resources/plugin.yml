@@ -1,0 +1,12 @@
+name: LightBRServerDemo
+main: org.wengdev.lightbr.server.LightBRServerPlugin
+version: 0.1.0
+author: wengdev
+api-version: 1.21.4
+commands:
+  lightbrsettings:
+    description: Send LightBR settings packets to a player.
+    usage: /lightbrsettings <ack|setcontext|resetcache|addregion> [player] [enabled] [chunkXZ] [chunkY]
+permissions:
+  lightbrsettings.use:
+    default: op

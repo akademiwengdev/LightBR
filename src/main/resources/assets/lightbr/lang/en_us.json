@@ -16,6 +16,10 @@
   "lightbr.config.renderable_block_entities.open_selector": "Open Selector",
   "lightbr.config.renderable_block_entities.desc": "Pick blocks with block entities to keep rendering when 'Un-render Block Entities' is enabled. Includes search and multi-select.",
   "lightbr.config.renderable_block_entities.title": "Renderable Block Entities",
+  "lightbr.config.server_controlled.name": "Server Control",
+  "lightbr.config.server_controlled.active": "Active",
+  "lightbr.config.server_controlled.inactive": "Inactive",
+  "lightbr.config.server_controlled.desc": "When active, the server controls LightBR. Local settings apply only when the server does not acknowledge LightBR.",
   "lightbr.select.search": "Search",
   "lightbr.select.select_all": "Select All",
   "lightbr.select.clear": "Clear",
@@ -27,4 +31,3 @@
   "lightbr.select.no_matches": "No matches",
   "lightbr.log.disconnect_cleared": "[LightBR] Disconnected from world. Track cache cleared."
 }
-

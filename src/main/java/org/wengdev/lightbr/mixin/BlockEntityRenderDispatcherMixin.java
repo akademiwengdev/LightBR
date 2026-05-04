@@ -10,18 +10,20 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.wengdev.lightbr.LightBR;
+import org.wengdev.lightbr.RenderContext;
 
 @Mixin(BlockEntityRenderDispatcher.class)
 public class BlockEntityRenderDispatcherMixin {
     @Inject(method = "render(Lnet/minecraft/block/entity/BlockEntity;FLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;)V", at = @At("HEAD"), cancellable = true)
     private <E extends BlockEntity> void onRenderBlockEntity(E blockEntity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, CallbackInfo ci) {
-        if (!LightBR.config.isEnabled) {
+        RenderContext context = LightBR.getRenderContext();
+        if (!context.isEnabled) {
             return;
         }
 
-        if (LightBR.config.shouldUnrenderBlockEntities) {
+        if (context.unrenderBlockEntities) {
             String blockId = Registries.BLOCK.getId(blockEntity.getCachedState().getBlock()).toString();
-            if (LightBR.config.renderableBlockEntities.contains(blockId)) {
+            if (context.alwaysRenderBlockEntities.contains(blockId)) {
                 return;
             }
 

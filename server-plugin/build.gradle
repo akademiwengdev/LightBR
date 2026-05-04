@@ -1,0 +1,29 @@
+plugins {
+    id "java"
+}
+
+group = project.property("group")
+version = project.property("version")
+
+def javaVersion = Integer.parseInt(project.property("java_version"))
+
+def paperVersion = project.property("paper_version")
+
+repositories {
+    mavenCentral()
+    maven { url = "https://repo.papermc.io/repository/maven-public/" }
+}
+
+dependencies {
+    compileOnly "io.papermc.paper:paper-api:${paperVersion}"
+}
+
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(javaVersion)
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = "UTF-8"
+    options.release.set(javaVersion)
+}
+
