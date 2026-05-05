@@ -18,7 +18,7 @@ This document specifies the custom payload protocol used to control LightBR rend
 | 2 | RESET_CACHE | S2C | No additional fields |
 
 Notes:
-- The client sends `ACK` once on join (C2S). This packet contains only the packet type.
+- The client sends `ACK` once on join (C2S). This packet contains the protocol version client used.
 - The server replies with `ACK` (S2C) containing a full render context. This puts the client into server-controlled mode.
 - The server may send `SET_CONTEXT` at any time to update the render context.
 - The server may send `RESET_CACHE` at any time to force client cache invalidation.
@@ -43,6 +43,7 @@ When using `DataOutputStream`, remember:
 
 ```
 varint packetType = 0
+varint protocolVersion
 ```
 
 ### ACK (server -> client)

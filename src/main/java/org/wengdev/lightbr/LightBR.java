@@ -7,6 +7,8 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
+import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.metadata.CustomValue;
 import net.minecraft.block.Block;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
@@ -24,6 +26,10 @@ import java.util.List;
 
 public class LightBR implements ClientModInitializer {
     public static LightBRConfig config;
+    public static final int PROTOCOL_VERSION = loadProtocolVersion();
+
+    private static final int DEFAULT_PROTOCOL_VERSION = 1;
+
     public static HashMap<String, Float> defaultSlipperinessMap = null;
 
     private static final int DEFAULT_CHUNK_XZ_RADIUS = 1;
@@ -39,6 +45,25 @@ public class LightBR implements ClientModInitializer {
     private static final float DEFAULT_BLOCK_SLIPPERINESS = 0.6f;
     private static final String KEY_CATEGORY = "category.lightbr";
     private static KeyBinding toggleKey;
+
+    private static int loadProtocolVersion() {
+        int version = DEFAULT_PROTOCOL_VERSION;
+        try {
+            var container = FabricLoader.getInstance().getModContainer("lightbr");
+            if (container.isPresent()) {
+                CustomValue custom = container.get().getMetadata().getCustomValue("lightbr");
+                if (custom != null && custom.getType() == CustomValue.CvType.OBJECT) {
+                    CustomValue entry = custom.getAsObject().get("protocol_version");
+                    if (entry != null) {
+                        version = Integer.parseInt(entry.getAsString());
+                    }
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Failed to read LightBR protocol_version, using default: " + e.getMessage());
+        }
+        return version;
+    }
 
     public static HashMap<String, Float> loadDefaultSlipperinessMap() {
         if (defaultSlipperinessMap == null) {
@@ -116,6 +141,7 @@ public class LightBR implements ClientModInitializer {
     private static void sendAcknowledgement() {
         PacketByteBuf buf = PacketByteBufs.create();
         buf.writeVarInt(PACKET_ACK);
+        buf.writeVarInt(PROTOCOL_VERSION);
         ClientPlayNetworking.send(SettingsPayload.fromBuf(buf));
     }
 

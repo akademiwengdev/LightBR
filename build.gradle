@@ -64,6 +64,7 @@ processResources {
     inputs.property "version", project.version
     inputs.property "minecraft_version", project.minecraft_version
     inputs.property "loader_version", project.loader_version
+    inputs.property "protocol_version", project.protocol_version
     filteringCharset "UTF-8"
 
     filesMatching("fabric.mod.json") {
@@ -73,7 +74,8 @@ processResources {
                 "yacl_version": project.yacl_version,
                 "modmenu_version": project.modmenu_version,
                 "sodium_version": project.sodium_version,
-                "obu_version": project.obu_version
+                "obu_version": project.obu_version,
+                "protocol_version": project.protocol_version
     }
 }
 

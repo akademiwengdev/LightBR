@@ -32,5 +32,10 @@
     "modmenu": ">=${modmenu_version}",
     "sodium": ">=${sodium_version}",
     "openboatutils": ">=${obu_version}"
+  },
+  "custom": {
+    "lightbr": {
+      "protocol_version": "${protocol_version}"
+    }
   }
 }
