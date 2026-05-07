@@ -23,7 +23,7 @@ public class YACLConfigScreen extends YACLScreen {
 
     public static YetAnotherConfigLib generateConfigScreen() {
         final OptionGroup generalGroup = createGeneralGroup();
-        final OptionGroup renderGroup = createRenderGroup();
+        final OptionGroup renderGroup = createDefaultSettingsGroup();
 
         return YetAnotherConfigLib.createBuilder()
                 .title(Text.translatable("lightbr.config.title"))
@@ -66,7 +66,14 @@ public class YACLConfigScreen extends YACLScreen {
                 .build()
         );
 
-        generalGroup.option(Option.<Boolean>createBuilder()
+        return generalGroup.build();
+    }
+
+    private static OptionGroup createDefaultSettingsGroup() {
+        final OptionGroup.Builder defaultSettingsGroup = OptionGroup.createBuilder();
+        defaultSettingsGroup.name(Text.translatable("lightbr.config.render_group.name"));
+
+        defaultSettingsGroup.option(Option.<Boolean>createBuilder()
                 .name(Text.translatable("lightbr.config.render_water.name"))
                 .description(OptionDescription.of(Text.translatable("lightbr.config.render_water.desc")))
                 .binding(
@@ -78,7 +85,7 @@ public class YACLConfigScreen extends YACLScreen {
                 .build()
         );
 
-        generalGroup.option(Option.<Boolean>createBuilder()
+        defaultSettingsGroup.option(Option.<Boolean>createBuilder()
                 .name(Text.translatable("lightbr.config.render_lava.name"))
                 .description(OptionDescription.of(Text.translatable("lightbr.config.render_lava.desc")))
                 .binding(
@@ -90,7 +97,7 @@ public class YACLConfigScreen extends YACLScreen {
                 .build()
         );
 
-        generalGroup.option(Option.<Boolean>createBuilder()
+        defaultSettingsGroup.option(Option.<Boolean>createBuilder()
                 .name(Text.translatable("lightbr.config.unrender_block_entities.name"))
                 .description(OptionDescription.of(Text.translatable("lightbr.config.unrender_block_entities.desc")))
                 .binding(
@@ -102,14 +109,7 @@ public class YACLConfigScreen extends YACLScreen {
                 .build()
         );
 
-        return generalGroup.build();
-    }
-
-    private static OptionGroup createRenderGroup() {
-        final OptionGroup.Builder renderGroup = OptionGroup.createBuilder();
-        renderGroup.name(Text.translatable("lightbr.config.render_group.name"));
-
-        renderGroup.option(ButtonOption.createBuilder()
+        defaultSettingsGroup.option(ButtonOption.createBuilder()
                 .name(Text.translatable("lightbr.config.renderable_block_entities.name"))
                 .text(Text.translatable("lightbr.config.renderable_block_entities.open_selector"))
                 .description(OptionDescription.of(Text.translatable(
@@ -130,6 +130,6 @@ public class YACLConfigScreen extends YACLScreen {
                 .build()
         );
 
-        return renderGroup.build();
+        return defaultSettingsGroup.build();
     }
 }
