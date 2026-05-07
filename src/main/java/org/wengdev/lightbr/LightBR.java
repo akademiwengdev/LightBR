@@ -169,7 +169,7 @@ public class LightBR implements ClientModInitializer {
         toggleKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
                 "key.lightbr.toggle",
                 InputUtil.Type.KEYSYM,
-                GLFW.GLFW_KEY_B,
+                GLFW.GLFW_KEY_V,
                 KEY_CATEGORY
         ));
 
