@@ -21,8 +21,10 @@ import org.wengdev.lightbr.config.LightBRConfig;
 import org.wengdev.lightbr.obu.OBUManager;
 import org.wengdev.lightbr.network.SettingsPayload;
 
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Properties;
 
 public class LightBR implements ClientModInitializer {
     public static LightBRConfig config;
@@ -47,7 +49,34 @@ public class LightBR implements ClientModInitializer {
     private static KeyBinding toggleKey;
 
     private static int loadProtocolVersion() {
-        int version = DEFAULT_PROTOCOL_VERSION;
+        Integer version = loadProtocolVersionFromProperties();
+        if (version != null) {
+            return version;
+        }
+
+        version = loadProtocolVersionFromMetadata();
+        return version != null ? version : DEFAULT_PROTOCOL_VERSION;
+    }
+
+    private static Integer loadProtocolVersionFromProperties() {
+        try (InputStream in = LightBR.class.getClassLoader().getResourceAsStream("lightbr.properties")) {
+            if (in == null) {
+                return null;
+            }
+            Properties props = new Properties();
+            props.load(in);
+            String value = props.getProperty("protocol_version");
+            if (value == null || value.isBlank()) {
+                return null;
+            }
+            return Integer.parseInt(value.trim());
+        } catch (Exception e) {
+            System.err.println("Failed to read LightBR protocol_version from properties: " + e.getMessage());
+            return null;
+        }
+    }
+
+    private static Integer loadProtocolVersionFromMetadata() {
         try {
             var container = FabricLoader.getInstance().getModContainer("lightbr");
             if (container.isPresent()) {
@@ -55,14 +84,14 @@ public class LightBR implements ClientModInitializer {
                 if (custom != null && custom.getType() == CustomValue.CvType.OBJECT) {
                     CustomValue entry = custom.getAsObject().get("protocol_version");
                     if (entry != null) {
-                        version = Integer.parseInt(entry.getAsString());
+                        return Integer.parseInt(entry.getAsString());
                     }
                 }
             }
         } catch (Exception e) {
             System.err.println("Failed to read LightBR protocol_version, using default: " + e.getMessage());
         }
-        return version;
+        return null;
     }
 
     public static HashMap<String, Float> loadDefaultSlipperinessMap() {
@@ -119,11 +148,18 @@ public class LightBR implements ClientModInitializer {
         TrackCache.clear();
     }
 
+    public static void clearCacheAndReload() {
+        TrackCache.clear();
+
+        if (LightBR.config.isEnabled) {
+            reloadWorldRenderer();
+        }
+    }
+
     public static void applyServerRenderContext(RenderContext context) {
         renderContext = context;
         serverControlled = true;
-        TrackCache.clear();
-        reloadWorldRenderer();
+        clearCacheAndReload();
     }
 
     public static void clearServerControl() {
@@ -189,10 +225,7 @@ public class LightBR implements ClientModInitializer {
             }
 
             if (packetType == PACKET_RESET_CACHE) {
-                context.client().execute(() -> {
-                    TrackCache.clear();
-                    reloadWorldRenderer();
-                });
+                context.client().execute(LightBR::clearCacheAndReload);
             }
         });
 

@@ -77,6 +77,10 @@ processResources {
                 "obu_version": project.obu_version,
                 "protocol_version": project.protocol_version
     }
+
+    filesMatching("lightbr.properties") {
+        expand "protocol_version": project.protocol_version
+    }
 }
 
 def targetJavaVersion = 21

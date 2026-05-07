@@ -1,6 +1,6 @@
 # LightBR Server Demo Plugin
 
-A small Paper 1.21.4 plugin that demonstrates server-controlled LightBR settings. It sends an ACK + render context on join and exposes a command to send SET_CONTEXT and RESET_CACHE packets.
+A small Paper 1.21.4 plugin that demonstrates server-controlled LightBR settings. It replies to client ACKs with an ACK + render context and exposes commands to send SET_CONTEXT and RESET_CACHE packets.
 
 ## Build
 
@@ -17,9 +17,8 @@ The jar will be at `server-plugin/build/libs/lightbr-server-plugin-0.1.0.jar`.
 
 ## Usage
 
-- On join, players receive an ACK + context packet.
+- When a player joins, the client sends an ACK packet; the server responds with ACK + context.
 - Commands:
-  - `/lightbrsettings ack [player]` sends ACK + context.
   - `/lightbrsettings setcontext [player] [enabled] [chunkXZ] [chunkY]` sends SET_CONTEXT with updated values.
   - `/lightbrsettings resetcache [player]` sends RESET_CACHE.
 
@@ -37,4 +36,3 @@ The payload written to `lightbr:settings` matches the client mod:
   - `boolean unrenderBlockEntities`
   - `varint blockEntityCount`, then each `string`
   - `varint regionCount`, then each region `double ax, ay, az, bx, by, bz`
-

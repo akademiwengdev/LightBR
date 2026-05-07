@@ -5,16 +5,17 @@ import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.plugin.messaging.PluginMessageListener;
 
+import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-public class LightBRServerPlugin extends JavaPlugin implements Listener {
+public class LightBRServerPlugin extends JavaPlugin implements PluginMessageListener {
     private static final String CHANNEL = "lightbr:settings";
     private static final double DEFAULT_REGION_RADIUS = 16.0;
     private static final double DEFAULT_REGION_HEIGHT = 16.0;
@@ -25,17 +26,30 @@ public class LightBRServerPlugin extends JavaPlugin implements Listener {
     public void onEnable() {
         currentContext = RenderContextData.demoDefault();
         Bukkit.getMessenger().registerOutgoingPluginChannel(this, CHANNEL);
-        Bukkit.getPluginManager().registerEvents(this, this);
+        Bukkit.getMessenger().registerIncomingPluginChannel(this, CHANNEL, this);
     }
 
     @Override
     public void onDisable() {
         Bukkit.getMessenger().unregisterOutgoingPluginChannel(this, CHANNEL);
+        Bukkit.getMessenger().unregisterIncomingPluginChannel(this, CHANNEL, this);
     }
 
-    @EventHandler
-    public void onPlayerJoin(PlayerJoinEvent event) {
-        sendAckWithContext(event.getPlayer(), currentContext);
+    @Override
+    public void onPluginMessageReceived(String channel, Player player, byte[] message) {
+        if (!CHANNEL.equals(channel) || player == null || message == null || message.length == 0) {
+            return;
+        }
+
+        try (DataInputStream in = new DataInputStream(new ByteArrayInputStream(message))) {
+            int packetType = readVarInt(in);
+            if (packetType == LightBRSettingsCodec.PACKET_ACK) {
+                readVarInt(in); // client protocol version (not used yet)
+                sendAckWithContext(player, currentContext);
+            }
+        } catch (IOException e) {
+            getLogger().warning("Failed to decode LightBR settings packet: " + e.getMessage());
+        }
     }
 
     @Override
@@ -50,22 +64,13 @@ public class LightBRServerPlugin extends JavaPlugin implements Listener {
         }
 
         if (args.length == 0) {
-            sender.sendMessage("Usage: /lightbrsettings <ack|setcontext|resetcache|addregion> ...");
+            sender.sendMessage("Usage: /lightbrsettings <setcontext|resetcache|addregion> ...");
             return true;
         }
 
         String sub = args[0].toLowerCase(Locale.ROOT);
 
         switch (sub) {
-            case "ack" -> {
-                Player target = resolveTargetPlayer(sender, args);
-                if (target == null) {
-                    sender.sendMessage("Player not found.");
-                    return true;
-                }
-                sendAckWithContext(target, currentContext);
-                sender.sendMessage("Sent ACK + context to " + target.getName());
-            }
             case "setcontext" -> {
                 Player target = resolveTargetPlayer(sender, args);
                 if (target == null) {
@@ -95,7 +100,7 @@ public class LightBRServerPlugin extends JavaPlugin implements Listener {
                 currentContext = withAddedRegion(currentContext, region);
                 sender.sendMessage("Added always-render region to context.");
             }
-            default -> sender.sendMessage("Unknown subcommand. Use ack, setcontext, resetcache, or addregion.");
+            default -> sender.sendMessage("Unknown subcommand. Use setcontext, resetcache, or addregion.");
         }
 
         return true;
@@ -239,5 +244,21 @@ public class LightBRServerPlugin extends JavaPlugin implements Listener {
         } catch (NumberFormatException e) {
             return fallback;
         }
+    }
+
+    private int readVarInt(DataInputStream in) throws IOException {
+        int numRead = 0;
+        int result = 0;
+        byte read;
+        do {
+            read = in.readByte();
+            int value = (read & 0x7F);
+            result |= (value << (7 * numRead));
+            numRead++;
+            if (numRead > 5) {
+                throw new IOException("VarInt too large");
+            }
+        } while ((read & 0x80) != 0);
+        return result;
     }
 }
