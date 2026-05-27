@@ -56,6 +56,7 @@ public class LightBR implements ClientModInitializer {
     private static volatile RenderContext renderContext;
     private static volatile RenderContextPatch serverContextPatch;
     private static volatile boolean serverControlled = false;
+    private static int pendingAckTicks = -1;
 
     private static final float DEFAULT_BLOCK_SLIPPERINESS = 0.6f;
     private static final String KEY_CATEGORY = "category.lightbr";
@@ -175,7 +176,7 @@ public class LightBR implements ClientModInitializer {
     public static void clearCacheAndReload() {
         TrackCache.clear();
 
-        if (LightBR.config.isEnabled) {
+        if (getRenderContext().isEnabled) {
             reloadWorldRenderer();
         }
     }
@@ -230,7 +231,6 @@ public class LightBR implements ClientModInitializer {
         buf.writeVarInt(CONFIG_PACKET_ACK);
         buf.writeVarInt(PROTOCOL_VERSION);
         ClientPlayNetworking.send(ConfigPayload.fromBuf(buf));
-        System.out.println("Acknowledgement sent");
     }
 
     private static RenderContext buildRenderContextFromConfig(LightBRConfig config) {
@@ -264,17 +264,25 @@ public class LightBR implements ClientModInitializer {
         ));
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
+            if (pendingAckTicks >= 0) {
+                if (pendingAckTicks == 0) {
+                    if (client.getNetworkHandler() != null) {
+                        sendAcknowledgement();
+                    }
+                    pendingAckTicks = -1;
+                } else {
+                    pendingAckTicks--;
+                }
+            }
             while (toggleKey.wasPressed()) {
                 toggleEnabled();
             }
         });
 
         ClientPlayNetworking.registerGlobalReceiver(SettingsPayload.ID, (payload, context) -> {
-            System.out.println("A packet received on settings payload");
 
             PacketByteBuf dataBuf = payload.toPacketByteBuf();
             int packetType = dataBuf.readVarInt();
-            System.out.println("A packet received on settings payload: " + packetType);
             switch (packetType) {
                 case PACKET_SET_ENABLED -> {
                     boolean value = dataBuf.readBoolean();
@@ -330,9 +338,8 @@ public class LightBR implements ClientModInitializer {
         ClientPlayNetworking.registerGlobalReceiver(ConfigPayload.ID, (payload, context) -> {
             PacketByteBuf dataBuf = payload.toPacketByteBuf();
             int packetType = dataBuf.readVarInt();
-            System.out.println("A packet received on config payload: " + packetType);
             if (packetType == CONFIG_PACKET_ACK) {
-                System.out.println("Acknowledgement it was from the server");
+                System.out.println(Text.translatable("lightbr.log.acknowledge_received").getString());
                 context.client().execute(LightBR::applyServerControlAck);
             }
         });
@@ -340,13 +347,14 @@ public class LightBR implements ClientModInitializer {
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
             clearServerControl();
             TrackCache.clear();
+            pendingAckTicks = -1;
             System.out.println(Text.translatable("lightbr.log.disconnect_cleared").getString());
         });
 
         ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
             clearServerControl();
             TrackCache.clear();
-            sendAcknowledgement();
+            pendingAckTicks = 1;
         });
     }
 }

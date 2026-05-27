@@ -51,10 +51,15 @@ public class LightBRServerPlugin extends JavaPlugin implements PluginMessageList
         try (DataInputStream in = new DataInputStream(new ByteArrayInputStream(message))) {
             int packetType = readVarInt(in);
             if (CONFIG_CHANNEL.equals(channel) && packetType == LightBRSettingsCodec.CONFIG_PACKET_ACK) {
-                System.out.println("Received config ACK from " + player.getName());
+                this.getLogger().info("Received config ACK from " + player.getName());
                 readVarInt(in); // client protocol version (not used yet)
-                sendConfigAck(player);
-                sendContextUpdates(player, currentContext);
+                Bukkit.getScheduler().runTaskLater(this, () -> {
+                    if (!player.isOnline()) {
+                        return;
+                    }
+                    sendConfigAck(player);
+                    sendContextUpdates(player, currentContext);
+                }, 1L);
             }
         } catch (IOException e) {
             getLogger().warning("Failed to decode LightBR settings packet: " + e.getMessage());
@@ -181,7 +186,7 @@ public class LightBRServerPlugin extends JavaPlugin implements PluginMessageList
         byte[] payload = LightBRSettingsCodec.encodeConfigAckPacket();
         player.sendPluginMessage(this, CONFIG_CHANNEL, payload);
 
-        System.out.println("Sent config ACK to " + player.getName());
+        this.getLogger().info("Sent config ACK to " + player.getName());
     }
 
     private void sendContextUpdates(Player player, RenderContextData context) {

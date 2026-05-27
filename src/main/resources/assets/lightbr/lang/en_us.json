@@ -29,5 +29,6 @@
   "lightbr.select.entry_selected": "[x] %s",
   "lightbr.select.entry_unselected": "[ ] %s",
   "lightbr.select.no_matches": "No matches",
-  "lightbr.log.disconnect_cleared": "[LightBR] Disconnected from world. Track cache cleared."
+  "lightbr.log.disconnect_cleared": "[LightBR] Disconnected from world. Track cache cleared.",
+  "lightbr.log.acknowledge_received": "[LightBR] Server acknowledged LightBR. Server control is now active."
 }
