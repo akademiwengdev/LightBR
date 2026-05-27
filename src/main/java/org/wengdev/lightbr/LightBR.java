@@ -7,8 +7,6 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
-import net.fabricmc.loader.api.FabricLoader;
-import net.fabricmc.loader.api.metadata.CustomValue;
 import net.minecraft.block.Block;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
@@ -19,9 +17,11 @@ import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
 import org.wengdev.lightbr.config.LightBRConfig;
 import org.wengdev.lightbr.obu.OBUManager;
+import org.wengdev.lightbr.network.ConfigPayload;
 import org.wengdev.lightbr.network.SettingsPayload;
 
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
@@ -30,18 +30,31 @@ public class LightBR implements ClientModInitializer {
     public static LightBRConfig config;
     public static final int PROTOCOL_VERSION = loadProtocolVersion();
 
-    private static final int DEFAULT_PROTOCOL_VERSION = 1;
+    private static final int DEFAULT_PROTOCOL_VERSION = 3;
 
     public static HashMap<String, Float> defaultSlipperinessMap = null;
+
+    private static final String SETTINGS_CHANNEL = "lightbr:settings";
+    private static final String CONFIG_CHANNEL = "lightbr:config";
 
     private static final int DEFAULT_CHUNK_XZ_RADIUS = 1;
     private static final int DEFAULT_CHUNK_Y_RADIUS = 1;
 
-    private static final int PACKET_ACK = 0;
-    private static final int PACKET_SET_CONTEXT = 1;
-    private static final int PACKET_RESET_CACHE = 2;
+    private static final int CONFIG_PACKET_ACK = 0;
+
+    private static final int PACKET_SET_ENABLED = 1;
+    private static final int PACKET_SET_RENDER_ALL_WATER = 2;
+    private static final int PACKET_SET_CHUNK_XZ = 3;
+    private static final int PACKET_SET_CHUNK_Y = 4;
+    private static final int PACKET_SET_RENDER_ALL_LAVA = 5;
+    private static final int PACKET_SET_UNRENDER_BLOCK_ENTITIES = 6;
+    private static final int PACKET_SET_ALWAYS_RENDER_BLOCK_ENTITIES = 7;
+    private static final int PACKET_SET_ALWAYS_RENDER_REGIONS = 8;
+    private static final int PACKET_RESET_CACHE = 9;
+    private static final int PACKET_RESET_SETTINGS = 10;
 
     private static volatile RenderContext renderContext;
+    private static volatile RenderContextPatch serverContextPatch;
     private static volatile boolean serverControlled = false;
 
     private static final float DEFAULT_BLOCK_SLIPPERINESS = 0.6f;
@@ -50,11 +63,6 @@ public class LightBR implements ClientModInitializer {
 
     private static int loadProtocolVersion() {
         Integer version = loadProtocolVersionFromProperties();
-        if (version != null) {
-            return version;
-        }
-
-        version = loadProtocolVersionFromMetadata();
         return version != null ? version : DEFAULT_PROTOCOL_VERSION;
     }
 
@@ -74,24 +82,6 @@ public class LightBR implements ClientModInitializer {
             System.err.println("Failed to read LightBR protocol_version from properties: " + e.getMessage());
             return null;
         }
-    }
-
-    private static Integer loadProtocolVersionFromMetadata() {
-        try {
-            var container = FabricLoader.getInstance().getModContainer("lightbr");
-            if (container.isPresent()) {
-                CustomValue custom = container.get().getMetadata().getCustomValue("lightbr");
-                if (custom != null && custom.getType() == CustomValue.CvType.OBJECT) {
-                    CustomValue entry = custom.getAsObject().get("protocol_version");
-                    if (entry != null) {
-                        return Integer.parseInt(entry.getAsString());
-                    }
-                }
-            }
-        } catch (Exception e) {
-            System.err.println("Failed to read LightBR protocol_version, using default: " + e.getMessage());
-        }
-        return null;
     }
 
     public static HashMap<String, Float> loadDefaultSlipperinessMap() {
@@ -130,21 +120,55 @@ public class LightBR implements ClientModInitializer {
         return serverControlled;
     }
 
+    public static boolean isEnabledServerControlled() {
+        return serverControlled && serverContextPatch != null && serverContextPatch.isEnabled != null;
+    }
+
+    public static boolean isRenderAllWaterServerControlled() {
+        return serverControlled && serverContextPatch != null && serverContextPatch.renderAllWater != null;
+    }
+
+    public static boolean isRenderAllLavaServerControlled() {
+        return serverControlled && serverContextPatch != null && serverContextPatch.renderAllLava != null;
+    }
+
+    public static boolean isUnrenderBlockEntitiesServerControlled() {
+        return serverControlled && serverContextPatch != null && serverContextPatch.unrenderBlockEntities != null;
+    }
+
+    public static boolean isRenderableBlockEntitiesServerControlled() {
+        return serverControlled && serverContextPatch != null && serverContextPatch.alwaysRenderBlockEntities != null;
+    }
+
+    public static boolean isAlwaysRenderRegionsServerControlled() {
+        return serverControlled && serverContextPatch != null && serverContextPatch.alwaysRenderRegions != null;
+    }
+
     public static RenderContext getRenderContext() {
         RenderContext context = renderContext;
         if (context == null) {
             LightBRConfig fallback = config != null ? config : new LightBRConfig();
-            context = buildRenderContextFromConfig(fallback);
+            RenderContext defaults = buildRenderContextFromConfig(fallback);
+            if (serverControlled && serverContextPatch != null) {
+                context = serverContextPatch.merge(defaults);
+            } else {
+                context = defaults;
+            }
             renderContext = context;
         }
         return context;
     }
 
     public static void updateRenderContextFromConfig() {
-        if (config == null || serverControlled) {
+        if (config == null) {
             return;
         }
-        renderContext = buildRenderContextFromConfig(config);
+        RenderContext defaults = buildRenderContextFromConfig(config);
+        if (serverControlled && serverContextPatch != null) {
+            renderContext = serverContextPatch.merge(defaults);
+        } else {
+            renderContext = defaults;
+        }
         TrackCache.clear();
     }
 
@@ -156,15 +180,42 @@ public class LightBR implements ClientModInitializer {
         }
     }
 
-    public static void applyServerRenderContext(RenderContext context) {
-        renderContext = context;
+    public static void applyServerRenderContext(RenderContextPatch patch) {
+        serverContextPatch = patch;
         serverControlled = true;
+        LightBRConfig fallback = config != null ? config : new LightBRConfig();
+        renderContext = patch.merge(buildRenderContextFromConfig(fallback));
         clearCacheAndReload();
     }
 
     public static void clearServerControl() {
         serverControlled = false;
+        serverContextPatch = null;
         updateRenderContextFromConfig();
+    }
+
+    private static void applyServerOverride(java.util.function.Function<RenderContextPatch, RenderContextPatch> updater) {
+        RenderContextPatch base = serverContextPatch != null ? serverContextPatch : RenderContextPatch.empty();
+        serverContextPatch = updater.apply(base);
+        serverControlled = true;
+        LightBRConfig fallback = config != null ? config : new LightBRConfig();
+        renderContext = serverContextPatch.merge(buildRenderContextFromConfig(fallback));
+        clearCacheAndReload();
+    }
+
+    private static void applyServerControlAck() {
+        serverControlled = true;
+        RenderContextPatch patch = serverContextPatch != null ? serverContextPatch : RenderContextPatch.empty();
+        LightBRConfig fallback = config != null ? config : new LightBRConfig();
+        renderContext = patch.merge(buildRenderContextFromConfig(fallback));
+    }
+
+    private static void applyServerResetSettings() {
+        serverControlled = true;
+        serverContextPatch = RenderContextPatch.empty();
+        LightBRConfig fallback = config != null ? config : new LightBRConfig();
+        renderContext = serverContextPatch.merge(buildRenderContextFromConfig(fallback));
+        clearCacheAndReload();
     }
 
     private static void reloadWorldRenderer() {
@@ -176,9 +227,10 @@ public class LightBR implements ClientModInitializer {
 
     private static void sendAcknowledgement() {
         PacketByteBuf buf = PacketByteBufs.create();
-        buf.writeVarInt(PACKET_ACK);
+        buf.writeVarInt(CONFIG_PACKET_ACK);
         buf.writeVarInt(PROTOCOL_VERSION);
-        ClientPlayNetworking.send(SettingsPayload.fromBuf(buf));
+        ClientPlayNetworking.send(ConfigPayload.fromBuf(buf));
+        System.out.println("Acknowledgement sent");
     }
 
     private static RenderContext buildRenderContextFromConfig(LightBRConfig config) {
@@ -201,6 +253,8 @@ public class LightBR implements ClientModInitializer {
 
         PayloadTypeRegistry.playC2S().register(SettingsPayload.ID, SettingsPayload.CODEC);
         PayloadTypeRegistry.playS2C().register(SettingsPayload.ID, SettingsPayload.CODEC);
+        PayloadTypeRegistry.playC2S().register(ConfigPayload.ID, ConfigPayload.CODEC);
+        PayloadTypeRegistry.playS2C().register(ConfigPayload.ID, ConfigPayload.CODEC);
 
         toggleKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
                 "key.lightbr.toggle",
@@ -216,16 +270,70 @@ public class LightBR implements ClientModInitializer {
         });
 
         ClientPlayNetworking.registerGlobalReceiver(SettingsPayload.ID, (payload, context) -> {
+            System.out.println("A packet received on settings payload");
+
             PacketByteBuf dataBuf = payload.toPacketByteBuf();
             int packetType = dataBuf.readVarInt();
-            if (packetType == PACKET_ACK || packetType == PACKET_SET_CONTEXT) {
-                RenderContext contextPayload = RenderContext.readFromBuf(dataBuf);
-                context.client().execute(() -> applyServerRenderContext(contextPayload));
-                return;
+            System.out.println("A packet received on settings payload: " + packetType);
+            switch (packetType) {
+                case PACKET_SET_ENABLED -> {
+                    boolean value = dataBuf.readBoolean();
+                    context.client().execute(() -> applyServerOverride(patch -> patch.withEnabled(value)));
+                }
+                case PACKET_SET_RENDER_ALL_WATER -> {
+                    boolean value = dataBuf.readBoolean();
+                    context.client().execute(() -> applyServerOverride(patch -> patch.withRenderAllWater(value)));
+                }
+                case PACKET_SET_CHUNK_XZ -> {
+                    int value = dataBuf.readVarInt();
+                    context.client().execute(() -> applyServerOverride(patch -> patch.withChunkXZRadius(value)));
+                }
+                case PACKET_SET_CHUNK_Y -> {
+                    int value = dataBuf.readVarInt();
+                    context.client().execute(() -> applyServerOverride(patch -> patch.withChunkYRadius(value)));
+                }
+                case PACKET_SET_RENDER_ALL_LAVA -> {
+                    boolean value = dataBuf.readBoolean();
+                    context.client().execute(() -> applyServerOverride(patch -> patch.withRenderAllLava(value)));
+                }
+                case PACKET_SET_UNRENDER_BLOCK_ENTITIES -> {
+                    boolean value = dataBuf.readBoolean();
+                    context.client().execute(() -> applyServerOverride(patch -> patch.withUnrenderBlockEntities(value)));
+                }
+                case PACKET_SET_ALWAYS_RENDER_BLOCK_ENTITIES -> {
+                    int count = dataBuf.readVarInt();
+                    List<String> blockEntities = new java.util.ArrayList<>(count);
+                    for (int i = 0; i < count; i++) {
+                        blockEntities.add(dataBuf.readString());
+                    }
+                    List<String> resolved = List.copyOf(blockEntities);
+                    context.client().execute(() -> applyServerOverride(patch -> patch.withAlwaysRenderBlockEntities(resolved)));
+                }
+                case PACKET_SET_ALWAYS_RENDER_REGIONS -> {
+                    int count = dataBuf.readVarInt();
+                    List<net.minecraft.util.Pair<net.minecraft.util.math.Vec3d, net.minecraft.util.math.Vec3d>> regions = new java.util.ArrayList<>(count);
+                    for (int i = 0; i < count; i++) {
+                        net.minecraft.util.math.Vec3d a = new net.minecraft.util.math.Vec3d(dataBuf.readDouble(), dataBuf.readDouble(), dataBuf.readDouble());
+                        net.minecraft.util.math.Vec3d b = new net.minecraft.util.math.Vec3d(dataBuf.readDouble(), dataBuf.readDouble(), dataBuf.readDouble());
+                        regions.add(new net.minecraft.util.Pair<>(a, b));
+                    }
+                    List<net.minecraft.util.Pair<net.minecraft.util.math.Vec3d, net.minecraft.util.math.Vec3d>> resolved = List.copyOf(regions);
+                    context.client().execute(() -> applyServerOverride(patch -> patch.withAlwaysRenderRegions(resolved)));
+                }
+                case PACKET_RESET_CACHE -> context.client().execute(LightBR::clearCacheAndReload);
+                case PACKET_RESET_SETTINGS -> context.client().execute(LightBR::applyServerResetSettings);
+                default -> {
+                }
             }
+        });
 
-            if (packetType == PACKET_RESET_CACHE) {
-                context.client().execute(LightBR::clearCacheAndReload);
+        ClientPlayNetworking.registerGlobalReceiver(ConfigPayload.ID, (payload, context) -> {
+            PacketByteBuf dataBuf = payload.toPacketByteBuf();
+            int packetType = dataBuf.readVarInt();
+            System.out.println("A packet received on config payload: " + packetType);
+            if (packetType == CONFIG_PACKET_ACK) {
+                System.out.println("Acknowledgement it was from the server");
+                context.client().execute(LightBR::applyServerControlAck);
             }
         });
 

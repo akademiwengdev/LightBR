@@ -16,7 +16,8 @@ import java.util.List;
 import java.util.Locale;
 
 public class LightBRServerPlugin extends JavaPlugin implements PluginMessageListener {
-    private static final String CHANNEL = "lightbr:settings";
+    private static final String SETTINGS_CHANNEL = "lightbr:settings";
+    private static final String CONFIG_CHANNEL = "lightbr:config";
     private static final double DEFAULT_REGION_RADIUS = 16.0;
     private static final double DEFAULT_REGION_HEIGHT = 16.0;
 
@@ -25,27 +26,35 @@ public class LightBRServerPlugin extends JavaPlugin implements PluginMessageList
     @Override
     public void onEnable() {
         currentContext = RenderContextData.demoDefault();
-        Bukkit.getMessenger().registerOutgoingPluginChannel(this, CHANNEL);
-        Bukkit.getMessenger().registerIncomingPluginChannel(this, CHANNEL, this);
+        Bukkit.getMessenger().registerOutgoingPluginChannel(this, SETTINGS_CHANNEL);
+        Bukkit.getMessenger().registerIncomingPluginChannel(this, SETTINGS_CHANNEL, this);
+        Bukkit.getMessenger().registerOutgoingPluginChannel(this, CONFIG_CHANNEL);
+        Bukkit.getMessenger().registerIncomingPluginChannel(this, CONFIG_CHANNEL, this);
     }
 
     @Override
     public void onDisable() {
-        Bukkit.getMessenger().unregisterOutgoingPluginChannel(this, CHANNEL);
-        Bukkit.getMessenger().unregisterIncomingPluginChannel(this, CHANNEL, this);
+        Bukkit.getMessenger().unregisterOutgoingPluginChannel(this, SETTINGS_CHANNEL);
+        Bukkit.getMessenger().unregisterIncomingPluginChannel(this, SETTINGS_CHANNEL, this);
+        Bukkit.getMessenger().unregisterOutgoingPluginChannel(this, CONFIG_CHANNEL);
+        Bukkit.getMessenger().unregisterIncomingPluginChannel(this, CONFIG_CHANNEL, this);
     }
 
     @Override
     public void onPluginMessageReceived(String channel, Player player, byte[] message) {
-        if (!CHANNEL.equals(channel) || player == null || message == null || message.length == 0) {
+        if (player == null || message == null || message.length == 0) {
             return;
         }
 
+        this.getLogger().info("Received plugin message on channel " + channel + " from player " + player.getName());
+
         try (DataInputStream in = new DataInputStream(new ByteArrayInputStream(message))) {
             int packetType = readVarInt(in);
-            if (packetType == LightBRSettingsCodec.PACKET_ACK) {
+            if (CONFIG_CHANNEL.equals(channel) && packetType == LightBRSettingsCodec.CONFIG_PACKET_ACK) {
+                System.out.println("Received config ACK from " + player.getName());
                 readVarInt(in); // client protocol version (not used yet)
-                sendAckWithContext(player, currentContext);
+                sendConfigAck(player);
+                sendContextUpdates(player, currentContext);
             }
         } catch (IOException e) {
             getLogger().warning("Failed to decode LightBR settings packet: " + e.getMessage());
@@ -79,8 +88,8 @@ public class LightBRServerPlugin extends JavaPlugin implements PluginMessageList
                 }
                 RenderContextData updated = buildContextFromArgs(args);
                 currentContext = updated;
-                sendSetContext(target, updated);
-                sender.sendMessage("Sent SET_CONTEXT to " + target.getName());
+                sendContextUpdates(target, updated);
+                sender.sendMessage("Sent context updates to " + target.getName());
             }
             case "resetcache" -> {
                 Player target = resolveTargetPlayer(sender, args);
@@ -108,18 +117,18 @@ public class LightBRServerPlugin extends JavaPlugin implements PluginMessageList
 
     private RenderContextData buildContextFromArgs(String[] args) {
         RenderContextData base = currentContext != null ? currentContext : RenderContextData.demoDefault();
-        boolean enabled = base.enabled;
-        int chunkXZ = base.chunkXZRadius;
-        int chunkY = base.chunkYRadius;
+        Boolean enabled = base.enabled;
+        Integer chunkXZ = base.chunkXZRadius;
+        Integer chunkY = base.chunkYRadius;
 
         if (args.length >= 3) {
-            enabled = Boolean.parseBoolean(args[2]);
+            enabled = parseBooleanOrNull(args[2], enabled);
         }
         if (args.length >= 4) {
-            chunkXZ = parseIntOrDefault(args[3], chunkXZ);
+            chunkXZ = parseIntOrNull(args[3], chunkXZ);
         }
         if (args.length >= 5) {
-            chunkY = parseIntOrDefault(args[4], chunkY);
+            chunkY = parseIntOrNull(args[4], chunkY);
         }
 
         return new RenderContextData(
@@ -134,7 +143,13 @@ public class LightBRServerPlugin extends JavaPlugin implements PluginMessageList
         );
     }
 
-    private int parseIntOrDefault(String value, int fallback) {
+    private Integer parseIntOrNull(String value, Integer fallback) {
+        if (value == null) {
+            return fallback;
+        }
+        if (value.equalsIgnoreCase("blank") || value.equalsIgnoreCase("default")) {
+            return null;
+        }
         try {
             return Integer.parseInt(value);
         } catch (NumberFormatException e) {
@@ -142,19 +157,69 @@ public class LightBRServerPlugin extends JavaPlugin implements PluginMessageList
         }
     }
 
-    private void sendAckWithContext(Player player, RenderContextData context) {
-        byte[] payload = LightBRSettingsCodec.encodeContextPacket(LightBRSettingsCodec.PACKET_ACK, context);
-        player.sendPluginMessage(this, CHANNEL, payload);
-    }
-
-    private void sendSetContext(Player player, RenderContextData context) {
-        byte[] payload = LightBRSettingsCodec.encodeContextPacket(LightBRSettingsCodec.PACKET_SET_CONTEXT, context);
-        player.sendPluginMessage(this, CHANNEL, payload);
+    private Boolean parseBooleanOrNull(String value, Boolean fallback) {
+        if (value == null) {
+            return fallback;
+        }
+        if (value.equalsIgnoreCase("blank") || value.equalsIgnoreCase("default")) {
+            return null;
+        }
+        return Boolean.parseBoolean(value);
     }
 
     private void sendResetCache(Player player) {
         byte[] payload = LightBRSettingsCodec.encodeResetCachePacket();
-        player.sendPluginMessage(this, CHANNEL, payload);
+        player.sendPluginMessage(this, SETTINGS_CHANNEL, payload);
+    }
+
+    private void sendResetSettings(Player player) {
+        byte[] payload = LightBRSettingsCodec.encodeResetSettingsPacket();
+        player.sendPluginMessage(this, SETTINGS_CHANNEL, payload);
+    }
+
+    private void sendConfigAck(Player player) {
+        byte[] payload = LightBRSettingsCodec.encodeConfigAckPacket();
+        player.sendPluginMessage(this, CONFIG_CHANNEL, payload);
+
+        System.out.println("Sent config ACK to " + player.getName());
+    }
+
+    private void sendContextUpdates(Player player, RenderContextData context) {
+        if (context == null) {
+            return;
+        }
+        if (context.enabled != null) {
+            byte[] payload = LightBRSettingsCodec.encodeBooleanPacket(LightBRSettingsCodec.PACKET_SET_ENABLED, context.enabled);
+            player.sendPluginMessage(this, SETTINGS_CHANNEL, payload);
+        }
+        if (context.chunkXZRadius != null) {
+            byte[] payload = LightBRSettingsCodec.encodeVarIntPacket(LightBRSettingsCodec.PACKET_SET_CHUNK_XZ, context.chunkXZRadius);
+            player.sendPluginMessage(this, SETTINGS_CHANNEL, payload);
+        }
+        if (context.chunkYRadius != null) {
+            byte[] payload = LightBRSettingsCodec.encodeVarIntPacket(LightBRSettingsCodec.PACKET_SET_CHUNK_Y, context.chunkYRadius);
+            player.sendPluginMessage(this, SETTINGS_CHANNEL, payload);
+        }
+        if (context.renderAllWater != null) {
+            byte[] payload = LightBRSettingsCodec.encodeBooleanPacket(LightBRSettingsCodec.PACKET_SET_RENDER_ALL_WATER, context.renderAllWater);
+            player.sendPluginMessage(this, SETTINGS_CHANNEL, payload);
+        }
+        if (context.renderAllLava != null) {
+            byte[] payload = LightBRSettingsCodec.encodeBooleanPacket(LightBRSettingsCodec.PACKET_SET_RENDER_ALL_LAVA, context.renderAllLava);
+            player.sendPluginMessage(this, SETTINGS_CHANNEL, payload);
+        }
+        if (context.unrenderBlockEntities != null) {
+            byte[] payload = LightBRSettingsCodec.encodeBooleanPacket(LightBRSettingsCodec.PACKET_SET_UNRENDER_BLOCK_ENTITIES, context.unrenderBlockEntities);
+            player.sendPluginMessage(this, SETTINGS_CHANNEL, payload);
+        }
+        if (context.alwaysRenderBlockEntities != null) {
+            byte[] payload = LightBRSettingsCodec.encodeBlockEntityListPacket(context.alwaysRenderBlockEntities);
+            player.sendPluginMessage(this, SETTINGS_CHANNEL, payload);
+        }
+        if (context.alwaysRenderRegions != null) {
+            byte[] payload = LightBRSettingsCodec.encodeRegionListPacket(context.alwaysRenderRegions);
+            player.sendPluginMessage(this, SETTINGS_CHANNEL, payload);
+        }
     }
 
     private Player resolveTargetPlayer(CommandSender sender, String[] args) {
@@ -223,8 +288,12 @@ public class LightBRServerPlugin extends JavaPlugin implements PluginMessageList
 
     private RenderContextData withAddedRegion(RenderContextData base, RenderContextData.Region region) {
         RenderContextData resolved = base != null ? base : RenderContextData.demoDefault();
-        List<String> blockEntities = new ArrayList<>(resolved.alwaysRenderBlockEntities);
-        List<RenderContextData.Region> regions = new ArrayList<>(resolved.alwaysRenderRegions);
+        List<String> blockEntities = resolved.alwaysRenderBlockEntities != null
+                ? new ArrayList<>(resolved.alwaysRenderBlockEntities)
+                : null;
+        List<RenderContextData.Region> regions = resolved.alwaysRenderRegions != null
+                ? new ArrayList<>(resolved.alwaysRenderRegions)
+                : new ArrayList<>();
         regions.add(region);
         return new RenderContextData(
                 resolved.enabled,

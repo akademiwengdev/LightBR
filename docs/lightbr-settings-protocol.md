@@ -4,84 +4,75 @@ This document specifies the custom payload protocol used to control LightBR rend
 
 ## Overview
 
-- Channel: `lightbr:settings`
-- Direction: client-to-server (ACK only) and server-to-client (ACK, SET_CONTEXT, RESET_CACHE)
+- Config Channel: `lightbr:config`
+- Settings Channel: `lightbr:settings`
+- Direction:
+  - `lightbr:config`: C2S ACK, S2C ACK
+  - `lightbr:settings`: S2C only
 - Transport: Minecraft Custom Payload using the same binary layout as `PacketByteBuf`
 - Packet type is always the first field and is encoded as a VarInt
 
 ## Packet Types
 
+### Config Channel (`lightbr:config`)
+
 | ID | Name | Direction | Payload |
 | --- | --- | --- | --- |
-| 0 | ACK | C2S + S2C | Render context (S2C only), none in C2S |
-| 1 | SET_CONTEXT | S2C | Render context |
-| 2 | RESET_CACHE | S2C | No additional fields |
+| 0 | ACK | C2S + S2C | C2S: protocol version; S2C: no payload |
+
+### Settings Channel (`lightbr:settings`)
+
+| ID | Name | Direction | Payload |
+| --- | --- | --- | --- |
+| 1 | SET_ENABLED | S2C | boolean |
+| 2 | SET_RENDER_ALL_WATER | S2C | boolean |
+| 3 | SET_CHUNK_XZ | S2C | varint |
+| 4 | SET_CHUNK_Y | S2C | varint |
+| 5 | SET_RENDER_ALL_LAVA | S2C | boolean |
+| 6 | SET_UNRENDER_BLOCK_ENTITIES | S2C | boolean |
+| 7 | SET_ALWAYS_RENDER_BLOCK_ENTITIES | S2C | list of strings |
+| 8 | SET_ALWAYS_RENDER_REGIONS | S2C | list of regions |
+| 9 | RESET_CACHE | S2C | no payload |
+| 10 | RESET_SETTINGS | S2C | no payload |
 
 Notes:
-- The client sends `ACK` once on join (C2S). This packet contains the protocol version client used.
-- The server replies with `ACK` (S2C) containing a full render context. This puts the client into server-controlled mode.
-- The server may send `SET_CONTEXT` at any time to update the render context.
-- The server may send `RESET_CACHE` at any time to force client cache invalidation.
-
-## Encoding Rules
-
-All fields use the same encoding as `PacketByteBuf`:
-
-- `boolean`: 1 byte (`0x00` or `0x01`)
-- `varint`: Minecraft VarInt (7-bit continuation)
-- `string`: `varint` length in bytes + UTF-8 bytes
-- `double`: 8-byte IEEE 754, big-endian
-
-When using `DataOutputStream`, remember:
-- `writeBoolean` matches `PacketByteBuf#writeBoolean`
-- `writeDouble` matches `PacketByteBuf#writeDouble`
-- `writeUTF` is NOT compatible; use the VarInt length + UTF-8 bytes as described above
+- The client sends `ACK` once on join over `lightbr:config`. This packet contains the protocol version client used.
+- The server replies with `ACK` (S2C) over `lightbr:config` to signal server-controlled mode.
+- When server control is active, the server sends individual settings packets over `lightbr:settings` as needed.
 
 ## Packet Layouts
 
-### ACK (client -> server)
+### ACK (client -> server, config channel)
 
 ```
 varint packetType = 0
 varint protocolVersion
 ```
 
-### ACK (server -> client)
+### ACK (server -> client, config channel)
 
 ```
 varint packetType = 0
-RenderContext context
 ```
 
-### SET_CONTEXT (server -> client)
+### Settings Packets (server -> client)
 
 ```
-varint packetType = 1
-RenderContext context
+varint packetType
+payload
 ```
 
-### RESET_CACHE (server -> client)
-
-```
-varint packetType = 2
-```
-
-## RenderContext Layout
-
-The render context is a full snapshot of all render settings. Field order and types are fixed and must match exactly.
-
-```
-boolean isEnabled
-varint chunkXZRadius
-varint chunkYRadius
-boolean renderAllWater
-boolean renderAllLava
-boolean unrenderBlockEntities
-varint alwaysRenderBlockEntitiesCount
-string alwaysRenderBlockEntityId * count
-varint alwaysRenderRegionsCount
-Region * count
-```
+Payload layouts:
+- `SET_ENABLED`: `boolean value`
+- `SET_RENDER_ALL_WATER`: `boolean value`
+- `SET_CHUNK_XZ`: `varint value`
+- `SET_CHUNK_Y`: `varint value`
+- `SET_RENDER_ALL_LAVA`: `boolean value`
+- `SET_UNRENDER_BLOCK_ENTITIES`: `boolean value`
+- `SET_ALWAYS_RENDER_BLOCK_ENTITIES`: `varint count` + `string * count`
+- `SET_ALWAYS_RENDER_REGIONS`: `varint count` + `Region * count`
+- `RESET_CACHE`: no additional fields
+- `RESET_SETTINGS`: no additional fields
 
 ### Region Layout
 
@@ -98,20 +89,23 @@ Regions are axis-aligned boxes. The ordering is preserved as written (no automat
 
 ## Behavioral Rules
 
-- On client join, send C2S `ACK`. The server should respond with S2C `ACK` containing the initial render context.
-- When a client receives S2C `ACK` or `SET_CONTEXT`, it must:
-  - apply the new render context
+- On client join, send C2S `ACK` on `lightbr:config`. The server replies with S2C `ACK` to enable server-controlled mode.
+- If server-controlled mode is active, the client merges server-provided settings with local defaults.
+- When a client receives any settings packet (S2C), it must:
+  - apply the updated value to the server override context
   - clear render caches
   - reload the world renderer
 - When a client receives `RESET_CACHE`, it must:
   - clear render caches
   - reload the world renderer
-- Server-controlled mode is active once S2C `ACK` is received; local config should be considered read-only until disconnect.
+- When a client receives `RESET_SETTINGS`, it must:
+  - clear all server overrides and revert to local defaults
+  - clear render caches
+  - reload the world renderer
 
 ## Implementation References
 
 - Server encoder: `server-plugin/src/main/java/org/wengdev/lightbr/server/LightBRSettingsCodec.java`
-- Client decoder: `src/main/java/org/wengdev/lightbr/RenderContext.java`
+- Server handler: `server-plugin/src/main/java/org/wengdev/lightbr/server/LightBRServerPlugin.java`
 - Client handler: `src/main/java/org/wengdev/lightbr/LightBR.java`
-- Payload wrapper: `src/main/java/org/wengdev/lightbr/network/SettingsPayload.java`
-
+- Payload wrappers: `src/main/java/org/wengdev/lightbr/network/SettingsPayload.java`, `src/main/java/org/wengdev/lightbr/network/ConfigPayload.java`

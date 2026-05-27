@@ -1,6 +1,6 @@
 # LightBR Server Demo Plugin
 
-A small Paper 1.21.4 plugin that demonstrates server-controlled LightBR settings. It replies to client ACKs with an ACK + render context and exposes commands to send SET_CONTEXT and RESET_CACHE packets.
+A small Paper 1.21.4 plugin that demonstrates server-controlled LightBR settings. It replies to client ACKs on `lightbr:config` and sends per-setting updates on `lightbr:settings`.
 
 ## Build
 
@@ -17,22 +17,22 @@ The jar will be at `server-plugin/build/libs/lightbr-server-plugin-0.1.0.jar`.
 
 ## Usage
 
-- When a player joins, the client sends an ACK packet; the server responds with ACK + context.
+- When a player joins, the client sends an ACK packet on `lightbr:config`; the server responds with ACK to enable server-controlled mode.
 - Commands:
-  - `/lightbrsettings setcontext [player] [enabled] [chunkXZ] [chunkY]` sends SET_CONTEXT with updated values.
+  - `/lightbrsettings setcontext [player] [enabled] [chunkXZ] [chunkY]` sends per-field updates for the current context.
   - `/lightbrsettings resetcache [player]` sends RESET_CACHE.
 
 ## Packet Format
 
-The payload written to `lightbr:settings` matches the client mod:
+The payloads are split across two channels:
 
-- `varint packetType` (0 = ACK, 1 = SET_CONTEXT, 2 = RESET_CACHE)
-- For ACK/SET_CONTEXT only, the render context fields follow:
-  - `boolean isEnabled`
-  - `varint chunkXZRadius`
-  - `varint chunkYRadius`
-  - `boolean renderAllWater`
-  - `boolean renderAllLava`
-  - `boolean unrenderBlockEntities`
-  - `varint blockEntityCount`, then each `string`
-  - `varint regionCount`, then each region `double ax, ay, az, bx, by, bz`
+- `lightbr:config`:
+  - `varint packetType` (0 = ACK)
+  - C2S: `varint protocolVersion`
+  - S2C: no payload
+
+- `lightbr:settings`:
+  - `varint packetType`
+  - For packet types 1..8, a single value or list follows (see `docs/lightbr-settings-protocol.md`)
+  - `packetType = 9` is RESET_CACHE with no additional fields
+  - `packetType = 10` is RESET_SETTINGS with no additional fields

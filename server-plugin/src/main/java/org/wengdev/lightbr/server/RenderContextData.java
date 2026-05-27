@@ -4,16 +4,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RenderContextData {
-    public final boolean enabled;
-    public final int chunkXZRadius;
-    public final int chunkYRadius;
-    public final boolean renderAllWater;
-    public final boolean renderAllLava;
-    public final boolean unrenderBlockEntities;
+    public final Boolean enabled;
+    public final Integer chunkXZRadius;
+    public final Integer chunkYRadius;
+    public final Boolean renderAllWater;
+    public final Boolean renderAllLava;
+    public final Boolean unrenderBlockEntities;
     public final List<String> alwaysRenderBlockEntities;
     public final List<Region> alwaysRenderRegions;
 
-    public RenderContextData(boolean enabled, int chunkXZRadius, int chunkYRadius, boolean renderAllWater, boolean renderAllLava, boolean unrenderBlockEntities, List<String> alwaysRenderBlockEntities, List<Region> alwaysRenderRegions) {
+    public RenderContextData(Boolean enabled, Integer chunkXZRadius, Integer chunkYRadius, Boolean renderAllWater, Boolean renderAllLava, Boolean unrenderBlockEntities, List<String> alwaysRenderBlockEntities, List<Region> alwaysRenderRegions) {
         this.enabled = enabled;
         this.chunkXZRadius = chunkXZRadius;
         this.chunkYRadius = chunkYRadius;
@@ -40,4 +40,3 @@ public class RenderContextData {
     public record Region(double ax, double ay, double az, double bx, double by, double bz) {
     }
 }
-

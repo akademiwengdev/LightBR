@@ -7,18 +7,71 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 public final class LightBRSettingsCodec {
-    public static final int PACKET_ACK = 0;
-    public static final int PACKET_SET_CONTEXT = 1;
-    public static final int PACKET_RESET_CACHE = 2;
+    public static final int CONFIG_PACKET_ACK = 0;
+
+    public static final int PACKET_SET_ENABLED = 1;
+    public static final int PACKET_SET_RENDER_ALL_WATER = 2;
+    public static final int PACKET_SET_CHUNK_XZ = 3;
+    public static final int PACKET_SET_CHUNK_Y = 4;
+    public static final int PACKET_SET_RENDER_ALL_LAVA = 5;
+    public static final int PACKET_SET_UNRENDER_BLOCK_ENTITIES = 6;
+    public static final int PACKET_SET_ALWAYS_RENDER_BLOCK_ENTITIES = 7;
+    public static final int PACKET_SET_ALWAYS_RENDER_REGIONS = 8;
+    public static final int PACKET_RESET_CACHE = 9;
+    public static final int PACKET_RESET_SETTINGS = 10;
 
     private LightBRSettingsCodec() {
     }
 
-    public static byte[] encodeContextPacket(int packetType, RenderContextData context) {
+    public static byte[] encodeBooleanPacket(int packetType, boolean value) {
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
         try (DataOutputStream out = new DataOutputStream(bytes)) {
             writeVarInt(out, packetType);
-            writeContext(out, context);
+            out.writeBoolean(value);
+        } catch (IOException e) {
+            throw new IllegalStateException("Failed to encode LightBR settings packet", e);
+        }
+        return bytes.toByteArray();
+    }
+
+    public static byte[] encodeVarIntPacket(int packetType, int value) {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        try (DataOutputStream out = new DataOutputStream(bytes)) {
+            writeVarInt(out, packetType);
+            writeVarInt(out, value);
+        } catch (IOException e) {
+            throw new IllegalStateException("Failed to encode LightBR settings packet", e);
+        }
+        return bytes.toByteArray();
+    }
+
+    public static byte[] encodeBlockEntityListPacket(List<String> blockEntities) {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        try (DataOutputStream out = new DataOutputStream(bytes)) {
+            writeVarInt(out, PACKET_SET_ALWAYS_RENDER_BLOCK_ENTITIES);
+            writeVarInt(out, blockEntities.size());
+            for (String blockEntityId : blockEntities) {
+                writeString(out, blockEntityId);
+            }
+        } catch (IOException e) {
+            throw new IllegalStateException("Failed to encode LightBR settings packet", e);
+        }
+        return bytes.toByteArray();
+    }
+
+    public static byte[] encodeRegionListPacket(List<RenderContextData.Region> regions) {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        try (DataOutputStream out = new DataOutputStream(bytes)) {
+            writeVarInt(out, PACKET_SET_ALWAYS_RENDER_REGIONS);
+            writeVarInt(out, regions.size());
+            for (RenderContextData.Region region : regions) {
+                out.writeDouble(region.ax());
+                out.writeDouble(region.ay());
+                out.writeDouble(region.az());
+                out.writeDouble(region.bx());
+                out.writeDouble(region.by());
+                out.writeDouble(region.bz());
+            }
         } catch (IOException e) {
             throw new IllegalStateException("Failed to encode LightBR settings packet", e);
         }
@@ -35,30 +88,24 @@ public final class LightBRSettingsCodec {
         return bytes.toByteArray();
     }
 
-    private static void writeContext(DataOutputStream out, RenderContextData context) throws IOException {
-        out.writeBoolean(context.enabled);
-        writeVarInt(out, context.chunkXZRadius);
-        writeVarInt(out, context.chunkYRadius);
-        out.writeBoolean(context.renderAllWater);
-        out.writeBoolean(context.renderAllLava);
-        out.writeBoolean(context.unrenderBlockEntities);
-
-        List<String> blockEntities = context.alwaysRenderBlockEntities;
-        writeVarInt(out, blockEntities.size());
-        for (String blockEntityId : blockEntities) {
-            writeString(out, blockEntityId);
+    public static byte[] encodeConfigAckPacket() {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        try (DataOutputStream out = new DataOutputStream(bytes)) {
+            writeVarInt(out, CONFIG_PACKET_ACK);
+        } catch (IOException e) {
+            throw new IllegalStateException("Failed to encode LightBR config packet", e);
         }
+        return bytes.toByteArray();
+    }
 
-        List<RenderContextData.Region> regions = context.alwaysRenderRegions;
-        writeVarInt(out, regions.size());
-        for (RenderContextData.Region region : regions) {
-            out.writeDouble(region.ax());
-            out.writeDouble(region.ay());
-            out.writeDouble(region.az());
-            out.writeDouble(region.bx());
-            out.writeDouble(region.by());
-            out.writeDouble(region.bz());
+    public static byte[] encodeResetSettingsPacket() {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        try (DataOutputStream out = new DataOutputStream(bytes)) {
+            writeVarInt(out, PACKET_RESET_SETTINGS);
+        } catch (IOException e) {
+            throw new IllegalStateException("Failed to encode LightBR reset settings packet", e);
         }
+        return bytes.toByteArray();
     }
 
     private static void writeString(DataOutputStream out, String value) throws IOException {

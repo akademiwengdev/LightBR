@@ -62,6 +62,7 @@ public class YACLConfigScreen extends YACLScreen {
                         () -> LightBR.config.isEnabled,
                         newValue -> LightBR.config.isEnabled = newValue
                 )
+                .available(!LightBR.isEnabledServerControlled())
                 .controller(TickBoxControllerBuilder::create)
                 .build()
         );
@@ -81,6 +82,7 @@ public class YACLConfigScreen extends YACLScreen {
                         () -> LightBR.config.renderAllWater,
                         newValue -> LightBR.config.renderAllWater = newValue
                 )
+                .available(!LightBR.isRenderAllWaterServerControlled())
                 .controller(TickBoxControllerBuilder::create)
                 .build()
         );
@@ -93,6 +95,7 @@ public class YACLConfigScreen extends YACLScreen {
                         () -> LightBR.config.renderAllLava,
                         newValue -> LightBR.config.renderAllLava = newValue
                 )
+                .available(!LightBR.isRenderAllLavaServerControlled())
                 .controller(TickBoxControllerBuilder::create)
                 .build()
         );
@@ -105,6 +108,7 @@ public class YACLConfigScreen extends YACLScreen {
                         () -> LightBR.config.shouldUnrenderBlockEntities,
                         newValue -> LightBR.config.shouldUnrenderBlockEntities = newValue
                 )
+                .available(!LightBR.isUnrenderBlockEntitiesServerControlled())
                 .controller(TickBoxControllerBuilder::create)
                 .build()
         );
@@ -115,6 +119,7 @@ public class YACLConfigScreen extends YACLScreen {
                 .description(OptionDescription.of(Text.translatable(
                         "lightbr.config.renderable_block_entities.desc"
                 )))
+                .available(!LightBR.isRenderableBlockEntitiesServerControlled())
                 .action((screen, option) -> {
                     List<String> options = Utils.getBlockEntityBackedBlockIds();
                     MinecraftClient.getInstance().setScreen(new SearchableMultiSelectScreen(
