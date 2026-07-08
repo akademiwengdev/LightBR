@@ -3,10 +3,11 @@
   "id": "lightbr",
   "version": "${version}",
   "name": "LightBR",
-  "description": "Chunk filtering optimization mod for ice boat racing. Testing build.",
+  "description": "Chunk filtering optimization mod for ice boat racing",
   "authors": ["Mednoob", "PixelSam123"],
   "contact": {
-    "issues": "https://discord.com/channels/1282400201075589240/1499816193865945300"
+    "discord": "https://discord.gg/kUvtxz4XNK",
+    "issues": "https://discord.com/channels/1466449652160135190/1524385326184009828"
   },
   "license": "All-Rights-Reserved",
   "icon": "assets/lightbr/icon.png",
