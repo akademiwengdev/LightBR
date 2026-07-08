@@ -31,3 +31,7 @@ In case something goes wrong (like a part of the track that's supposed to be ren
 - Latest 1.21.4 Mod Menu
 - Latest 1.21.4 Sodium (optional but recommended)
 - 1.21.4 OpenBoatUtils 0.4.x or 0.5.x (optional)
+
+## Issue Tracking/Reporting
+
+It's in my Discord server for now. Visit the Discord invite link of this project to get there!
