@@ -2,12 +2,12 @@
 
 Chunk filtering optimization mod for ice boat racing
 
-![how it works](docs/how-it-works.png)
+![LightBR introduction video](https://youtu.be/zSyhgRuL1FQ)
 
 ## What is this mod?
 
 TLDR - it makes **only chunks around driving surfaces (ice, OBU-tagged blocks)) rendered, hiding resource-heavy background decoration from many tracks.**  
-See image above for visualization.
+See video above for visualization.
 Useful when:
 - you have a potato PC, or
 - you have a high refresh rate screen and want to max out smoothness, by reducing CPU time dedicated to loading chunks
@@ -17,7 +17,7 @@ Useful when:
 - Set keybind to toggle the mod on and off, so you can have proper visibility in server lobbies (`V` by default)
 - Explore other settings by visiting the mod settings under Mod Menu
 
-## This mod's in Alpha! How safe is this to use?
+## How safe is this to use?
 
 It's marked as Alpha since we want to integrate with ice boat racing server owners for a more seamless experience without having to toggle the mod on and off in certain scenarios.  
 Also to give track makers a say in how a Minecraft client should render out their tracks.
