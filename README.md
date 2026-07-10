@@ -34,4 +34,7 @@ In case something goes wrong (like a part of the track that's supposed to be ren
 
 ## Issue Tracking/Reporting
 
-It's in my Discord server for now. Visit the Discord invite link of this project to get there!
+It's in my Discord and Stoat server for now (choose whichever works best for you).
+
+- https://stt.gg/0F2MBxGd
+- https://discord.gg/S4NhfuWrf4
