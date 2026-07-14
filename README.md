@@ -6,7 +6,7 @@ Chunk filtering optimization mod for ice boat racing
 
 ## What is this mod?
 
-TLDR - it makes **only chunks around driving surfaces (ice, OBU-tagged blocks)) rendered, hiding resource-heavy background decoration from many tracks.**  
+TLDR - it makes **only chunks around driving surfaces (ice, OBU-tagged blocks) rendered, hiding resource-heavy background decoration from many tracks.**  
 See video above for visualization.
 Useful when:
 - you have a potato PC, or
