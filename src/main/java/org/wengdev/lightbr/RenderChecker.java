@@ -1,18 +1,17 @@
 package org.wengdev.lightbr;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.registry.Registries;
-import net.minecraft.util.Pair;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.BlockRenderView;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.util.Tuple;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 import org.wengdev.lightbr.obu.OBUManager;
 
 import java.util.List;
 
 public class RenderChecker {
-    public static boolean shouldRenderBlock(BlockState state, BlockPos pos, BlockRenderView world) {
+    public static boolean shouldRenderBlock(BlockState state, BlockPos pos) {
         RenderContext context = LightBR.getRenderContext();
         if (!LightBR.config.isEnabled || !context.isEnabled || OBUManager.isDefaultSlipperinessSet()) {
             return true;
@@ -22,7 +21,7 @@ public class RenderChecker {
             return true;
         }
 
-        String blockId = Registries.BLOCK.getId(state.getBlock()).toString();
+        String blockId = BuiltInRegistries.BLOCK.getKey(state.getBlock()).toString();
 
         if (LightBR.isSlipperyBlock(blockId)) {
             long chunkKey = TrackCache.toChunkKey(pos);
@@ -32,15 +31,15 @@ public class RenderChecker {
             return true;
         }
 
-        if (context.renderAllWater && state.isOf(Blocks.WATER)) return true;
-        if (context.renderAllLava && state.isOf(Blocks.LAVA)) return true;
+        if (context.renderAllWater && state.is(Blocks.WATER)) return true;
+        if (context.renderAllLava && state.is(Blocks.LAVA)) return true;
 
         long chunkKey = TrackCache.toChunkKey(pos);
         int sectionY = TrackCache.toSectionY(pos.getY());
         return TrackCache.shouldRenderChunk(chunkKey, sectionY);
     }
 
-    private static boolean isInAlwaysRenderRegion(List<Pair<Vec3d, Vec3d>> regions, BlockPos pos) {
+    private static boolean isInAlwaysRenderRegion(List<Tuple<Vec3, Vec3>> regions, BlockPos pos) {
         if (regions == null || regions.isEmpty()) {
             return false;
         }
@@ -49,9 +48,9 @@ public class RenderChecker {
         double y = pos.getY();
         double z = pos.getZ();
 
-        for (Pair<Vec3d, Vec3d> region : regions) {
-            Vec3d a = region.getLeft();
-            Vec3d b = region.getRight();
+        for (Tuple<Vec3, Vec3> region : regions) {
+            Vec3 a = region.getA();
+            Vec3 b = region.getB();
             double minX = Math.min(a.x, b.x);
             double maxX = Math.max(a.x, b.x);
             double minY = Math.min(a.y, b.y);

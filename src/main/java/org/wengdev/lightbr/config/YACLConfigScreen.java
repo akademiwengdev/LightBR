@@ -8,9 +8,9 @@ import dev.isxander.yacl3.api.OptionGroup;
 import dev.isxander.yacl3.api.YetAnotherConfigLib;
 import dev.isxander.yacl3.api.controller.TickBoxControllerBuilder;
 import dev.isxander.yacl3.gui.YACLScreen;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.text.Text;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
 import org.wengdev.lightbr.LightBR;
 import org.wengdev.lightbr.Utils;
 
@@ -26,10 +26,10 @@ public class YACLConfigScreen extends YACLScreen {
         final OptionGroup renderGroup = createDefaultSettingsGroup();
 
         return YetAnotherConfigLib.createBuilder()
-                .title(Text.translatable("lightbr.config.title"))
+                .title(Component.translatable("lightbr.config.title"))
                 .category(
                         ConfigCategory.createBuilder()
-                                .name(Text.translatable("lightbr.config.category"))
+                                .name(Component.translatable("lightbr.config.category"))
                                 .group(generalGroup)
                                 .group(renderGroup)
                                 .build()
@@ -41,22 +41,22 @@ public class YACLConfigScreen extends YACLScreen {
     private static OptionGroup createGeneralGroup() {
         final OptionGroup.Builder generalGroup = OptionGroup.createBuilder();
 
-        Text serverStatus = LightBR.isServerControlled()
-                ? Text.translatable("lightbr.config.server_controlled.active")
-                : Text.translatable("lightbr.config.server_controlled.inactive");
+        Component serverStatus = LightBR.isServerControlled()
+                ? Component.translatable("lightbr.config.server_controlled.active")
+                : Component.translatable("lightbr.config.server_controlled.inactive");
 
         generalGroup.option(ButtonOption.createBuilder()
-                .name(Text.translatable("lightbr.config.server_controlled.name"))
+                .name(Component.translatable("lightbr.config.server_controlled.name"))
                 .text(serverStatus)
-                .description(OptionDescription.of(Text.translatable("lightbr.config.server_controlled.desc")))
+                .description(OptionDescription.of(Component.translatable("lightbr.config.server_controlled.desc")))
                 .action((screen, option) -> {
                 })
                 .build()
         );
 
         generalGroup.option(Option.<Boolean>createBuilder()
-                .name(Text.translatable("lightbr.config.enabled.name"))
-                .description(OptionDescription.of(Text.translatable("lightbr.config.enabled.desc")))
+                .name(Component.translatable("lightbr.config.enabled.name"))
+                .description(OptionDescription.of(Component.translatable("lightbr.config.enabled.desc")))
                 .binding(
                         false,
                         () -> LightBR.config.isEnabled,
@@ -72,11 +72,11 @@ public class YACLConfigScreen extends YACLScreen {
 
     private static OptionGroup createDefaultSettingsGroup() {
         final OptionGroup.Builder defaultSettingsGroup = OptionGroup.createBuilder();
-        defaultSettingsGroup.name(Text.translatable("lightbr.config.render_group.name"));
+        defaultSettingsGroup.name(Component.translatable("lightbr.config.render_group.name"));
 
         defaultSettingsGroup.option(Option.<Boolean>createBuilder()
-                .name(Text.translatable("lightbr.config.render_water.name"))
-                .description(OptionDescription.of(Text.translatable("lightbr.config.render_water.desc")))
+                .name(Component.translatable("lightbr.config.render_water.name"))
+                .description(OptionDescription.of(Component.translatable("lightbr.config.render_water.desc")))
                 .binding(
                         true,
                         () -> LightBR.config.renderAllWater,
@@ -88,8 +88,8 @@ public class YACLConfigScreen extends YACLScreen {
         );
 
         defaultSettingsGroup.option(Option.<Boolean>createBuilder()
-                .name(Text.translatable("lightbr.config.render_lava.name"))
-                .description(OptionDescription.of(Text.translatable("lightbr.config.render_lava.desc")))
+                .name(Component.translatable("lightbr.config.render_lava.name"))
+                .description(OptionDescription.of(Component.translatable("lightbr.config.render_lava.desc")))
                 .binding(
                         true,
                         () -> LightBR.config.renderAllLava,
@@ -101,8 +101,8 @@ public class YACLConfigScreen extends YACLScreen {
         );
 
         defaultSettingsGroup.option(Option.<Boolean>createBuilder()
-                .name(Text.translatable("lightbr.config.unrender_block_entities.name"))
-                .description(OptionDescription.of(Text.translatable("lightbr.config.unrender_block_entities.desc")))
+                .name(Component.translatable("lightbr.config.unrender_block_entities.name"))
+                .description(OptionDescription.of(Component.translatable("lightbr.config.unrender_block_entities.desc")))
                 .binding(
                         false,
                         () -> LightBR.config.shouldUnrenderBlockEntities,
@@ -114,22 +114,20 @@ public class YACLConfigScreen extends YACLScreen {
         );
 
         defaultSettingsGroup.option(ButtonOption.createBuilder()
-                .name(Text.translatable("lightbr.config.renderable_block_entities.name"))
-                .text(Text.translatable("lightbr.config.renderable_block_entities.open_selector"))
-                .description(OptionDescription.of(Text.translatable(
+                .name(Component.translatable("lightbr.config.renderable_block_entities.name"))
+                .text(Component.translatable("lightbr.config.renderable_block_entities.open_selector"))
+                .description(OptionDescription.of(Component.translatable(
                         "lightbr.config.renderable_block_entities.desc"
                 )))
                 .available(!LightBR.isRenderableBlockEntitiesServerControlled())
                 .action((screen, option) -> {
                     List<String> options = Utils.getBlockEntityBackedBlockIds();
-                    MinecraftClient.getInstance().setScreen(new SearchableMultiSelectScreen(
+                    Minecraft.getInstance().setScreen(new SearchableMultiSelectScreen(
                             screen,
-                            Text.translatable("lightbr.config.renderable_block_entities.title"),
+                            Component.translatable("lightbr.config.renderable_block_entities.title"),
                             options,
                             LightBR.config.renderableBlockEntities,
-                            () -> {
-                                LightBR.config.saveAndReloadWorld();
-                            }
+                            () -> LightBR.config.saveAndReloadWorld()
                     ));
                 })
                 .build()

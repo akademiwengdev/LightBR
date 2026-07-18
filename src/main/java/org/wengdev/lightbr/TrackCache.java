@@ -1,9 +1,9 @@
 package org.wengdev.lightbr;
 
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.math.ChunkSectionPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.SectionPos;
+import net.minecraft.world.level.ChunkPos;
 
 import java.util.concurrent.locks.StampedLock;
 
@@ -20,15 +20,15 @@ public class TrackCache {
                 return;
             }
 
-            int cx = ChunkPos.getPackedX(chunkKey);
-            int cz = ChunkPos.getPackedZ(chunkKey);
+            int cx = ChunkPos.getX(chunkKey);
+            int cz = ChunkPos.getZ(chunkKey);
             int chunkRadius = getChunkRadius();
             int sectionRadius = getSectionRadius();
 
             for (int x = cx - chunkRadius; x <= cx + chunkRadius; x++) {
                 for (int y = sectionY - sectionRadius; y <= sectionY + sectionRadius; y++) {
                     for (int z = cz - chunkRadius; z <= cz + chunkRadius; z++) {
-                        RENDERABLE_SECTIONS.add(ChunkSectionPos.asLong(x, y, z));
+                        RENDERABLE_SECTIONS.add(SectionPos.asLong(x, y, z));
                     }
                 }
             }
@@ -61,11 +61,11 @@ public class TrackCache {
     }
 
     public static long toChunkKey(BlockPos pos) {
-        return ChunkPos.toLong(pos.getX() >> 4, pos.getZ() >> 4);
+        return ChunkPos.asLong(pos.getX() >> 4, pos.getZ() >> 4);
     }
 
     public static long toChunkKey(int chunkX, int chunkZ) {
-        return ChunkPos.toLong(chunkX, chunkZ);
+        return ChunkPos.asLong(chunkX, chunkZ);
     }
 
     private static int getChunkRadius() {
@@ -79,6 +79,6 @@ public class TrackCache {
     }
 
     private static long toSectionKey(long chunkKey, int sectionY) {
-        return ChunkSectionPos.asLong(ChunkPos.getPackedX(chunkKey), sectionY, ChunkPos.getPackedZ(chunkKey));
+        return SectionPos.asLong(ChunkPos.getX(chunkKey), sectionY, ChunkPos.getZ(chunkKey));
     }
 }

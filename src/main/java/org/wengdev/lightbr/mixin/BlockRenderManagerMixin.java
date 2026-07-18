@@ -1,24 +1,39 @@
 package org.wengdev.lightbr.mixin;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.render.block.BlockRenderManager;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.random.Random;
-import net.minecraft.world.BlockRenderView;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.minecraft.client.renderer.block.BlockRenderDispatcher;
+//? if 1.21.11
+//import net.minecraft.client.renderer.block.model.BlockModelPart;
+import net.minecraft.core.BlockPos;
+//? if 1.21.4
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.wengdev.lightbr.RenderChecker;
 
-@Mixin(BlockRenderManager.class)
+//? if 1.21.11
+//import java.util.List;
+
+@Mixin(BlockRenderDispatcher.class)
 public class BlockRenderManagerMixin {
-    @Inject(method = "renderBlock", at = @At("HEAD"), cancellable = true)
-    private void onRenderBlock(BlockState state, BlockPos pos, BlockRenderView world, MatrixStack matrices, VertexConsumer vertexConsumer, boolean cull, Random random, CallbackInfo ci) {
-        if (!RenderChecker.shouldRenderBlock(state, pos, world)) {
+    //? if 1.21.11 {
+    /*@Inject(method = "renderBatched", at = @At("HEAD"), cancellable = true)
+    private void onRenderBatched(BlockState state, BlockPos pos, BlockAndTintGetter tintGetter, PoseStack poseStack, VertexConsumer vertexConsumer, boolean bl, List<BlockModelPart> list, CallbackInfo ci) {
+        if (!RenderChecker.shouldRenderBlock(state, pos)) {
             ci.cancel();
         }
     }
+    *///? } elif 1.21.4 {
+    @Inject(method="renderBatched", at = @At("HEAD"), cancellable = true)
+    private void onRenderBatched(BlockState state, BlockPos pos, BlockAndTintGetter tintGetter, PoseStack poseStack, VertexConsumer vertexConsumer, boolean bl, RandomSource randomSource, CallbackInfo ci) {
+        if (!RenderChecker.shouldRenderBlock(state, pos)) {
+            ci.cancel();
+        }
+    }
+    //? }
 }
