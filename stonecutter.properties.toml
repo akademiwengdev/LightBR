@@ -1,0 +1,34 @@
+# See https://stonecutter.kikugie.dev/wiki/config/properties#centralized-properties
+mod.id = "lightbr"
+mod.name = "LightBR"
+mod.group = "org.wengdev"
+mod.version = "0.2"
+
+deps.fabric_loader = "0.19.3"
+loomx.loom_version = "1.17-SNAPSHOT"
+
+["1.21.4"]
+# Mod compatibility range in fabric.mod.json
+mod.mc_compat = "1.21.4"
+# List of releases to be marked compatible on Modrinth/Curseforge
+mod.mc_releases = ["1.21.4"]
+
+deps.fabric_api = "0.119.4+1.21.4"
+deps.yacl = "3.8.1+1.21.4-fabric"
+
+softdeps.modmenu = "13.0.4"
+softdeps.sodium = "mc1.21.4-0.6.3-fabric"
+softdeps.obu = "0.5.1c+1.21.4"
+softdeps.vulkanmod = "0.5.2"
+
+["1.21.11"]
+mod.mc_compat = "1.21.11"
+mod.mc_releases = ["1.21.11"]
+
+deps.fabric_api = "0.141.3+1.21.11"
+deps.yacl = "3.8.1+1.21.11-fabric"
+
+softdeps.modmenu = "17.0.0"
+softdeps.sodium = "mc1.21.11-0.8.0-fabric"
+softdeps.obu = "0.5.1c+1.21.9-1.21.11"
+softdeps.vulkanmod = "0.6.0"

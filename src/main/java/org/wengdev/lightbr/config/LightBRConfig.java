@@ -3,7 +3,7 @@ package org.wengdev.lightbr.config;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.SerializedName;
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.Minecraft;
 import org.wengdev.lightbr.LightBR;
 import org.wengdev.lightbr.Utils;
 
@@ -49,7 +49,7 @@ public class LightBRConfig {
         save();
 
         LightBR.updateRenderContextFromConfig();
-        MinecraftClient.getInstance().worldRenderer.reload();
+        Minecraft.getInstance().levelRenderer.allChanged();
     }
 
     public static LightBRConfig load() {

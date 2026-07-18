@@ -1,5 +1,6 @@
 package org.wengdev.lightbr;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
@@ -7,13 +8,15 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
-import net.minecraft.block.Block;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.option.KeyBinding;
-import net.minecraft.client.util.InputUtil;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.registry.Registries;
-import net.minecraft.text.Text;
+import net.minecraft.client.KeyMapping;
+import net.minecraft.client.Minecraft;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Tuple;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.phys.Vec3;
 import org.lwjgl.glfw.GLFW;
 import org.wengdev.lightbr.config.LightBRConfig;
 import org.wengdev.lightbr.obu.OBUManager;
@@ -21,7 +24,6 @@ import org.wengdev.lightbr.network.ConfigPayload;
 import org.wengdev.lightbr.network.SettingsPayload;
 
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
@@ -59,8 +61,12 @@ public class LightBR implements ClientModInitializer {
     private static int pendingAckTicks = -1;
 
     private static final float DEFAULT_BLOCK_SLIPPERINESS = 0.6f;
+    //? if 1.21.11 {
+    /*private static final KeyMapping.Category KEY_CATEGORY = KeyMapping.Category.register(ResourceLocation.fromNamespaceAndPath("category", "lightbr"));
+    *///? } elif 1.21.4 {
     private static final String KEY_CATEGORY = "category.lightbr";
-    private static KeyBinding toggleKey;
+    //? }
+    private static KeyMapping toggleKey;
 
     private static int loadProtocolVersion() {
         Integer version = loadProtocolVersionFromProperties();
@@ -89,9 +95,9 @@ public class LightBR implements ClientModInitializer {
         if (defaultSlipperinessMap == null) {
             defaultSlipperinessMap = new HashMap<>();
 
-            for (Block b : Registries.BLOCK.stream().toList()) {
-                if (b.getSlipperiness() != DEFAULT_BLOCK_SLIPPERINESS) {
-                    defaultSlipperinessMap.put(Registries.BLOCK.getId(b).toString(), b.getSlipperiness());
+            for (Block b : BuiltInRegistries.BLOCK.stream().toList()) {
+                if (b.getFriction() != DEFAULT_BLOCK_SLIPPERINESS) {
+                    defaultSlipperinessMap.put(BuiltInRegistries.BLOCK.getKey(b).toString(), b.getFriction());
                 }
             }
         }
@@ -220,14 +226,12 @@ public class LightBR implements ClientModInitializer {
     }
 
     private static void reloadWorldRenderer() {
-        MinecraftClient client = MinecraftClient.getInstance();
-        if (client != null && client.worldRenderer != null) {
-            client.worldRenderer.reload();
-        }
+        Minecraft client = Minecraft.getInstance();
+        client.levelRenderer.allChanged();
     }
 
     private static void sendAcknowledgement() {
-        PacketByteBuf buf = PacketByteBufs.create();
+        FriendlyByteBuf buf = PacketByteBufs.create();
         buf.writeVarInt(CONFIG_PACKET_ACK);
         buf.writeVarInt(PROTOCOL_VERSION);
         ClientPlayNetworking.send(ConfigPayload.fromBuf(buf));
@@ -256,9 +260,9 @@ public class LightBR implements ClientModInitializer {
         PayloadTypeRegistry.playC2S().register(ConfigPayload.ID, ConfigPayload.CODEC);
         PayloadTypeRegistry.playS2C().register(ConfigPayload.ID, ConfigPayload.CODEC);
 
-        toggleKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+        toggleKey = KeyBindingHelper.registerKeyBinding(new KeyMapping(
                 "key.lightbr.toggle",
-                InputUtil.Type.KEYSYM,
+                InputConstants.Type.KEYSYM,
                 GLFW.GLFW_KEY_V,
                 KEY_CATEGORY
         ));
@@ -266,7 +270,7 @@ public class LightBR implements ClientModInitializer {
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (pendingAckTicks >= 0) {
                 if (pendingAckTicks == 0) {
-                    if (client.getNetworkHandler() != null) {
+                    if (client.getConnection() != null) {
                         sendAcknowledgement();
                     }
                     pendingAckTicks = -1;
@@ -274,14 +278,14 @@ public class LightBR implements ClientModInitializer {
                     pendingAckTicks--;
                 }
             }
-            while (toggleKey.wasPressed()) {
+            while (toggleKey.consumeClick()) {
                 toggleEnabled();
             }
         });
 
         ClientPlayNetworking.registerGlobalReceiver(SettingsPayload.ID, (payload, context) -> {
 
-            PacketByteBuf dataBuf = payload.toPacketByteBuf();
+            FriendlyByteBuf dataBuf = payload.toPacketByteBuf();
             int packetType = dataBuf.readVarInt();
             switch (packetType) {
                 case PACKET_SET_ENABLED -> {
@@ -312,20 +316,20 @@ public class LightBR implements ClientModInitializer {
                     int count = dataBuf.readVarInt();
                     List<String> blockEntities = new java.util.ArrayList<>(count);
                     for (int i = 0; i < count; i++) {
-                        blockEntities.add(dataBuf.readString());
+                        blockEntities.add(dataBuf.readUtf());
                     }
                     List<String> resolved = List.copyOf(blockEntities);
                     context.client().execute(() -> applyServerOverride(patch -> patch.withAlwaysRenderBlockEntities(resolved)));
                 }
                 case PACKET_SET_ALWAYS_RENDER_REGIONS -> {
                     int count = dataBuf.readVarInt();
-                    List<net.minecraft.util.Pair<net.minecraft.util.math.Vec3d, net.minecraft.util.math.Vec3d>> regions = new java.util.ArrayList<>(count);
+                    List<Tuple<Vec3, Vec3>> regions = new java.util.ArrayList<>(count);
                     for (int i = 0; i < count; i++) {
-                        net.minecraft.util.math.Vec3d a = new net.minecraft.util.math.Vec3d(dataBuf.readDouble(), dataBuf.readDouble(), dataBuf.readDouble());
-                        net.minecraft.util.math.Vec3d b = new net.minecraft.util.math.Vec3d(dataBuf.readDouble(), dataBuf.readDouble(), dataBuf.readDouble());
-                        regions.add(new net.minecraft.util.Pair<>(a, b));
+                        Vec3 a = new Vec3(dataBuf.readDouble(), dataBuf.readDouble(), dataBuf.readDouble());
+                        Vec3 b = new Vec3(dataBuf.readDouble(), dataBuf.readDouble(), dataBuf.readDouble());
+                        regions.add(new Tuple<>(a, b));
                     }
-                    List<net.minecraft.util.Pair<net.minecraft.util.math.Vec3d, net.minecraft.util.math.Vec3d>> resolved = List.copyOf(regions);
+                    List<Tuple<Vec3, Vec3>> resolved = List.copyOf(regions);
                     context.client().execute(() -> applyServerOverride(patch -> patch.withAlwaysRenderRegions(resolved)));
                 }
                 case PACKET_RESET_CACHE -> context.client().execute(LightBR::clearCacheAndReload);
@@ -336,10 +340,10 @@ public class LightBR implements ClientModInitializer {
         });
 
         ClientPlayNetworking.registerGlobalReceiver(ConfigPayload.ID, (payload, context) -> {
-            PacketByteBuf dataBuf = payload.toPacketByteBuf();
+            FriendlyByteBuf dataBuf = payload.toPacketByteBuf();
             int packetType = dataBuf.readVarInt();
             if (packetType == CONFIG_PACKET_ACK) {
-                System.out.println(Text.translatable("lightbr.log.acknowledge_received").getString());
+                System.out.println(Component.translatable("lightbr.log.acknowledge_received").getString());
                 context.client().execute(LightBR::applyServerControlAck);
             }
         });
@@ -348,7 +352,7 @@ public class LightBR implements ClientModInitializer {
             clearServerControl();
             TrackCache.clear();
             pendingAckTicks = -1;
-            System.out.println(Text.translatable("lightbr.log.disconnect_cleared").getString());
+            System.out.println(Component.translatable("lightbr.log.disconnect_cleared").getString());
         });
 
         ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {

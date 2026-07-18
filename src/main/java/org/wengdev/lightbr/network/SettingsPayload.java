@@ -1,41 +1,40 @@
 package org.wengdev.lightbr.network;
 
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.util.Identifier;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.NotNull;
 
-public record SettingsPayload(byte[] data) implements CustomPayload {
-    public static final Id<SettingsPayload> ID = new Id<>(Identifier.of("lightbr", "settings"));
-    public static final PacketCodec<RegistryByteBuf, SettingsPayload> CODEC = new PacketCodec<>() {
+public record SettingsPayload(byte[] data) implements CustomPacketPayload {
+    public static final Type<SettingsPayload> ID = new Type<>(ResourceLocation.fromNamespaceAndPath("lightbr", "settings"));
+    public static final StreamCodec<RegistryFriendlyByteBuf, SettingsPayload> CODEC = new StreamCodec<>() {
         @Override
-        public SettingsPayload decode(RegistryByteBuf buf) {
-            byte[] data = new byte[buf.readableBytes()];
-            buf.readBytes(data);
-            return new SettingsPayload(data);
+        public @NotNull SettingsPayload decode(RegistryFriendlyByteBuf buf) {
+            return fromBuf(buf);
         }
 
         @Override
-        public void encode(RegistryByteBuf buf, SettingsPayload payload) {
+        public void encode(RegistryFriendlyByteBuf buf, SettingsPayload payload) {
             buf.writeBytes(payload.data());
         }
     };
 
     @Override
-    public Id<? extends CustomPayload> getId() {
+    public @NotNull Type<? extends CustomPacketPayload> type() {
         return ID;
     }
 
-    public static SettingsPayload fromBuf(PacketByteBuf buf) {
+    public static SettingsPayload fromBuf(FriendlyByteBuf buf) {
         byte[] data = new byte[buf.readableBytes()];
         buf.readBytes(data);
         return new SettingsPayload(data);
     }
 
-    public PacketByteBuf toPacketByteBuf() {
-        PacketByteBuf buf = PacketByteBufs.create();
+    public FriendlyByteBuf toPacketByteBuf() {
+        FriendlyByteBuf buf = PacketByteBufs.create();
         buf.writeBytes(data);
         return buf;
     }

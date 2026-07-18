@@ -1,7 +1,7 @@
 package org.wengdev.lightbr;
 
-import net.minecraft.util.Pair;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.Tuple;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.List;
 
@@ -13,9 +13,9 @@ public class RenderContextPatch {
     public final Boolean renderAllLava;
     public final Boolean unrenderBlockEntities;
     public final List<String> alwaysRenderBlockEntities;
-    public final List<Pair<Vec3d, Vec3d>> alwaysRenderRegions;
+    public final List<Tuple<Vec3, Vec3>> alwaysRenderRegions;
 
-    public RenderContextPatch(Boolean isEnabled, Integer chunkXZRadius, Integer chunkYRadius, Boolean renderAllWater, Boolean renderAllLava, Boolean unrenderBlockEntities, List<String> alwaysRenderBlockEntities, List<Pair<Vec3d, Vec3d>> alwaysRenderRegions) {
+    public RenderContextPatch(Boolean isEnabled, Integer chunkXZRadius, Integer chunkYRadius, Boolean renderAllWater, Boolean renderAllLava, Boolean unrenderBlockEntities, List<String> alwaysRenderBlockEntities, List<Tuple<Vec3, Vec3>> alwaysRenderRegions) {
         this.isEnabled = isEnabled;
         this.chunkXZRadius = chunkXZRadius;
         this.chunkYRadius = chunkYRadius;
@@ -58,7 +58,7 @@ public class RenderContextPatch {
         return new RenderContextPatch(isEnabled, chunkXZRadius, chunkYRadius, renderAllWater, renderAllLava, unrenderBlockEntities, value, alwaysRenderRegions);
     }
 
-    public RenderContextPatch withAlwaysRenderRegions(List<Pair<Vec3d, Vec3d>> value) {
+    public RenderContextPatch withAlwaysRenderRegions(List<Tuple<Vec3, Vec3>> value) {
         return new RenderContextPatch(isEnabled, chunkXZRadius, chunkYRadius, renderAllWater, renderAllLava, unrenderBlockEntities, alwaysRenderBlockEntities, value);
     }
 

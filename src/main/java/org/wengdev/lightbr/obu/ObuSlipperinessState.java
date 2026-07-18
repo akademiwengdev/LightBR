@@ -1,4 +1,4 @@
-package org.wengdev.lightbr.compat.obu;
+package org.wengdev.lightbr.obu;
 
 public final class ObuSlipperinessState {
     private static volatile boolean defaultSlipperinessSet;
@@ -14,4 +14,3 @@ public final class ObuSlipperinessState {
         defaultSlipperinessSet = value;
     }
 }
-

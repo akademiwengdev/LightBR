@@ -1,6 +1,7 @@
 {
   "key.lightbr.toggle": "Toggle LightBR",
   "category.lightbr": "LightBR",
+  "category:lightbr": "LightBR",
   "lightbr.config.title": "LightBR Config",
   "lightbr.config.category": "LightBR",
   "lightbr.config.enabled.name": "Enabled",

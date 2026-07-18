@@ -7,7 +7,10 @@
   "client": [
     "BlockEntityRenderDispatcherMixin",
     "BlockRenderManagerMixin",
-    "sodium.SodiumBlockRendererMixin"
+    "obu.MutableContextMixin",
+    "obu.OpenBoatUtilsMixin",
+    "sodium.SodiumBlockRendererMixin",
+    "vulkanmod.VulkanModBlockRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1

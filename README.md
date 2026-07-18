@@ -2,7 +2,9 @@
 
 Chunk filtering optimization mod for ice boat racing
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/zSyhgRuL1FQ?si=TrcIIhz4ekrE0u8R" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+![How it Works](./docs/how-it-works.png)
+
+Video demonstration & benchmark: https://www.youtube.com/watch?v=zSyhgRuL1FQ
 
 ## What is this mod?
 

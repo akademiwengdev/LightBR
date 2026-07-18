@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "id": "lightbr",
+  "id": "${id}",
   "version": "${version}",
-  "name": "LightBR",
+  "name": "${name}",
   "description": "Chunk filtering optimization mod for ice boat racing",
   "authors": ["Mednoob", "PixelSam123"],
   "contact": {
@@ -21,24 +21,19 @@
     ]
   },
   "mixins": [
-    "lightbr.mixins.json",
-    "lightbr.obu-legacy.mixins.json",
-    "lightbr.obu-latest.mixins.json"
+    "lightbr.mixins.json"
   ],
+  "accessWidener": "template.ct",
   "depends": {
-    "fabricloader": ">=${loader_version}",
+    "fabricloader": ">=${loader}",
+    "minecraft": "${minecraft}",
     "fabric-api": "*",
-    "minecraft": "${minecraft_version}",
-    "yet_another_config_lib_v3": ">=${yacl_version}"
+    "yet_another_config_lib_v3": ">=${yacl}"
   },
   "suggests": {
-    "modmenu": ">=${modmenu_version}",
-    "sodium": ">=${sodium_version}",
-    "openboatutils": ">=${obu_version}"
-  },
-  "custom": {
-    "lightbr": {
-      "protocol_version": "${protocol_version}"
-    }
+    "modmenu": ">=${modmenu}",
+    "sodium": ">=${sodium}",
+    "openboatutils": ">=${obu}",
+    "vulkanmod": ">=${vulkanmod}"
   }
 }
