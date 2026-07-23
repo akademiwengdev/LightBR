@@ -27,7 +27,7 @@
   "depends": {
     "fabricloader": ">=${loader}",
     "minecraft": "${minecraft}",
-    "fabric-api": "*",
+    "fabric-api": ">=${fabric_api}",
     "yet_another_config_lib_v3": ">=${yacl}"
   },
   "suggests": {

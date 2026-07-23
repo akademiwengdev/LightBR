@@ -113,6 +113,9 @@ tasks {
             register("version", "mod.version")
             register("minecraft", "mod.mc_compat")
             register("loader", "deps.fabric_loader")
+            register("fabric_api", "deps.fabric_api")
+
+            register("protocol_version", "lightbr.protocol_version")
 
             register("yacl", "deps.yacl")
 
@@ -123,6 +126,7 @@ tasks {
         }
 
         filesMatching("fabric.mod.json") { expand(props) }
+        filesMatching("lightbr.properties") { expand(props) }
 
         val mixinJava = "JAVA_${requiredJava.majorVersion}"
         filesMatching("*.mixins.json") { expand("java" to mixinJava) }

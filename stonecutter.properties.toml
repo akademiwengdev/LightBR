@@ -2,10 +2,12 @@
 mod.id = "lightbr"
 mod.name = "LightBR"
 mod.group = "org.wengdev"
-mod.version = "0.2"
+mod.version = "0.3"
 
 deps.fabric_loader = "0.19.3"
 loomx.loom_version = "1.17-SNAPSHOT"
+
+lightbr.protocol_version = "3"
 
 ["1.21.4"]
 # Mod compatibility range in fabric.mod.json
