@@ -27,13 +27,6 @@ Also to give track makers a say in how a Minecraft client should render out thei
 As for the stability of this mod, it should be in a pretty good state right now.  
 In case something goes wrong (like a part of the track that's supposed to be rendered isn't) you can immediately toggle off the mod with the global keybind.
 
-## Prerequisites
-
-- Minecraft 1.21.4
-- Latest 1.21.4 Mod Menu
-- Latest 1.21.4 Sodium (optional but recommended)
-- 1.21.4 OpenBoatUtils 0.4.x or 0.5.x (optional)
-
 ## Issue Tracking/Reporting
 
 It's in my Discord and Stoat server for now (choose whichever works best for you).
