@@ -22,6 +22,12 @@ public class LightBRConfig {
     @SerializedName("is_enabled")
     public boolean isEnabled = false;
 
+    @SerializedName("chunk_xz_radius")
+    public int chunkXZRadius = 1;
+
+    @SerializedName("chunk_y_radius")
+    public int chunkYRadius = 1;
+
     @SerializedName("render_water")
     public boolean renderAllWater = true;
 

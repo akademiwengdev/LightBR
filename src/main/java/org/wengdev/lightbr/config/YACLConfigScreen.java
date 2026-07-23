@@ -6,6 +6,7 @@ import dev.isxander.yacl3.api.Option;
 import dev.isxander.yacl3.api.OptionDescription;
 import dev.isxander.yacl3.api.OptionGroup;
 import dev.isxander.yacl3.api.YetAnotherConfigLib;
+import dev.isxander.yacl3.api.controller.IntegerSliderControllerBuilder;
 import dev.isxander.yacl3.api.controller.TickBoxControllerBuilder;
 import dev.isxander.yacl3.gui.YACLScreen;
 import net.minecraft.client.Minecraft;
@@ -64,6 +65,36 @@ public class YACLConfigScreen extends YACLScreen {
                 )
                 .available(!LightBR.isEnabledServerControlled())
                 .controller(TickBoxControllerBuilder::create)
+                .build()
+        );
+
+        generalGroup.option(Option.<Integer>createBuilder()
+                .name(Component.translatable("lightbr.config.chunk_xz_radius.name"))
+                .description(OptionDescription.of(Component.translatable("lightbr.config.chunk_xz_radius.desc")))
+                .binding(
+                        1,
+                        () -> LightBR.config.chunkXZRadius,
+                        newValue -> LightBR.config.chunkXZRadius = newValue
+                )
+                .available(!LightBR.isChunkXZServerControlled())
+                .controller(opt -> IntegerSliderControllerBuilder.create(opt)
+                        .range(0, 16)
+                        .step(1))
+                .build()
+        );
+
+        generalGroup.option(Option.<Integer>createBuilder()
+                .name(Component.translatable("lightbr.config.chunk_y_radius.name"))
+                .description(OptionDescription.of(Component.translatable("lightbr.config.chunk_y_radius.desc")))
+                .binding(
+                        1,
+                        () -> LightBR.config.chunkYRadius,
+                        newValue -> LightBR.config.chunkYRadius = newValue
+                )
+                .available(!LightBR.isChunkYServerControlled())
+                .controller(opt -> IntegerSliderControllerBuilder.create(opt)
+                        .range(0, 16)
+                        .step(1))
                 .build()
         );
 

@@ -39,9 +39,6 @@ public class LightBR implements ClientModInitializer {
     private static final String SETTINGS_CHANNEL = "lightbr:settings";
     private static final String CONFIG_CHANNEL = "lightbr:config";
 
-    private static final int DEFAULT_CHUNK_XZ_RADIUS = 1;
-    private static final int DEFAULT_CHUNK_Y_RADIUS = 1;
-
     private static final int CONFIG_PACKET_ACK = 0;
 
     private static final int PACKET_SET_ENABLED = 1;
@@ -62,7 +59,7 @@ public class LightBR implements ClientModInitializer {
 
     private static final float DEFAULT_BLOCK_SLIPPERINESS = 0.6f;
     //? if 1.21.11 {
-    /*private static final KeyMapping.Category KEY_CATEGORY = KeyMapping.Category.register(ResourceLocation.fromNamespaceAndPath("category", "lightbr"));
+    /*private static final KeyMapping.Category KEY_CATEGORY = KeyMapping.Category.register(ResourceLocation.fromNamespaceAndPath("lightbr", "category"));
     *///? } elif 1.21.4 {
     private static final String KEY_CATEGORY = "category.lightbr";
     //? }
@@ -133,6 +130,14 @@ public class LightBR implements ClientModInitializer {
 
     public static boolean isRenderAllWaterServerControlled() {
         return serverControlled && serverContextPatch != null && serverContextPatch.renderAllWater != null;
+    }
+
+    public static boolean isChunkXZServerControlled() {
+        return serverControlled && serverContextPatch != null && serverContextPatch.chunkXZRadius != null;
+    }
+
+    public static boolean isChunkYServerControlled() {
+        return serverControlled && serverContextPatch != null && serverContextPatch.chunkYRadius != null;
     }
 
     public static boolean isRenderAllLavaServerControlled() {
@@ -240,8 +245,8 @@ public class LightBR implements ClientModInitializer {
     private static RenderContext buildRenderContextFromConfig(LightBRConfig config) {
         return new RenderContext(
                 config.isEnabled,
-                DEFAULT_CHUNK_XZ_RADIUS,
-                DEFAULT_CHUNK_Y_RADIUS,
+                config.chunkXZRadius,
+                config.chunkYRadius,
                 List.of(),
                 config.renderAllWater,
                 config.renderAllLava,
