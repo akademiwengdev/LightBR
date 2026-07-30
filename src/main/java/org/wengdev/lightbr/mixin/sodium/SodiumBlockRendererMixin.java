@@ -1,8 +1,6 @@
 package org.wengdev.lightbr.mixin.sodium;
 
 import net.caffeinemc.mods.sodium.client.render.chunk.compile.pipeline.BlockRenderer;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.ClientLevel;
 //? if 1.21.11 {
 /*import net.minecraft.client.renderer.block.model.BlockStateModel;
 *///? } elif 1.21.4 {
