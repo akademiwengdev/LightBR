@@ -9,7 +9,7 @@
     "discord": "https://discord.gg/kUvtxz4XNK",
     "issues": "https://discord.com/channels/1466449652160135190/1524385326184009828"
   },
-  "license": "All-Rights-Reserved",
+  "license": "LGPL-3.0-only",
   "icon": "assets/lightbr/icon.png",
   "environment": "client",
   "entrypoints": {
