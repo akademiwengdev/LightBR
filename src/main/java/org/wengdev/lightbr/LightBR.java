@@ -364,6 +364,14 @@ public class LightBR implements ClientModInitializer {
             clearServerControl();
             TrackCache.clear();
             pendingAckTicks = 1;
+
+            if (OBUManager.isOBUIncompatible()) {
+                Component warning = Component.translatable("lightbr.log.obu_incompatible");
+                if (client.player != null) {
+                    client.player.displayClientMessage(warning, false);
+                    client.player.displayClientMessage(warning, true);
+                }
+            }
         });
     }
 }

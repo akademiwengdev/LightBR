@@ -1,24 +1,40 @@
 package org.wengdev.lightbr.obu;
 
+import dev.o7moon.openboatutils.OpenBoatUtils;
 import net.fabricmc.loader.api.FabricLoader;
-
-import java.util.HashMap;
 
 public class OBUManager {
     private static boolean isOBULoaded() {
         return FabricLoader.getInstance().isModLoaded("openboatutils");
     }
 
-    public static boolean isOBUEnabled() {
-        if (!isOBULoaded()) {
-            return false;
-        }
+    private static boolean hasObuCompatibilityBeenScanned = false;
+    private static boolean obuCompatible = false;
 
-        return OBUFetcher.isOBUEnabled();
+    private static boolean isOBUCompatible() {
+        if (!hasObuCompatibilityBeenScanned) {
+            try {
+                OpenBoatUtils.class.getDeclaredField("instance");
+                obuCompatible = true;
+            } catch (NoSuchFieldException e) {
+                obuCompatible = false;
+            }
+            hasObuCompatibilityBeenScanned = true;
+        }
+        return obuCompatible;
+    }
+
+    /** OBU mod loaded but incompatible */
+    public static boolean isOBUIncompatible() {
+        return isOBULoaded() && !isOBUCompatible();
+    }
+
+    public static boolean isOBUEnabled() {
+        return isOBULoaded() && isOBUCompatible();
     }
 
     public static boolean isDefaultSlipperinessSet() {
-        if (!isOBULoaded()) {
+        if (!isOBULoaded() || !isOBUCompatible()) {
             return false;
         }
 
@@ -26,7 +42,7 @@ public class OBUManager {
     }
 
     public static boolean isBlockSlippery(String blockId) {
-        if (!isOBULoaded()) {
+        if (!isOBULoaded() || !isOBUCompatible()) {
             return false;
         }
 

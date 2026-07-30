@@ -6,10 +6,6 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 
 public class OBUFetcher {
-    public static boolean isOBUEnabled() {
-        return true;
-    }
-
     public static boolean isIsDefaultSlipperinessSet() {
         return ObuSlipperinessState.isDefaultSlipperinessSet();
     }
