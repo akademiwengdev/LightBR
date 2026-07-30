@@ -4,7 +4,7 @@ mod.name = "LightBR"
 mod.group = "org.wengdev"
 mod.version = "0.3"
 
-deps.fabric_loader = "0.19.3"
+deps.fabric_loader = "0.16.14"
 loomx.loom_version = "1.17-SNAPSHOT"
 
 lightbr.protocol_version = "3"
@@ -15,10 +15,10 @@ mod.mc_compat = "1.21.4"
 # List of releases to be marked compatible on Modrinth/Curseforge
 mod.mc_releases = ["1.21.4"]
 
-deps.fabric_api = "0.119.4+1.21.4"
-deps.yacl = "3.8.1+1.21.4-fabric"
+deps.fabric_api = "0.119.3+1.21.4"
+deps.yacl = "3.7.1+1.21.4-fabric"
 
-softdeps.modmenu = "13.0.4"
+softdeps.modmenu = "13.0.3"
 softdeps.sodium = "mc1.21.4-0.6.3-fabric"
 softdeps.obu = "0.5.1c+1.21.4"
 softdeps.vulkanmod = "0.5.2"
