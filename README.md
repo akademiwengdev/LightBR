@@ -21,7 +21,7 @@ Useful when:
 
 ## How safe is this to use?
 
-It's marked as Alpha since we want to integrate with ice boat racing server owners for a more seamless experience without having to toggle the mod on and off in certain scenarios.  
+It's marked as Beta since we want to integrate with ice boat racing server owners for a more seamless experience without having to toggle the mod on and off in certain scenarios.  
 Also to give track makers a say in how a Minecraft client should render out their tracks.
 
 As for the stability of this mod, it should be in a pretty good state right now.  
@@ -29,7 +29,14 @@ In case something goes wrong (like a part of the track that's supposed to be ren
 
 ## Issue Tracking/Reporting
 
-It's in my Discord and Stoat server for now (choose whichever works best for you).
+There are three places where you can report issues or make suggestions,
+choose whichever works best for you.
 
-- https://stt.gg/0F2MBxGd
-- https://discord.gg/S4NhfuWrf4
+### 1. Stoat server
+https://stt.gg/0F2MBxGd
+
+### 2. Discord server
+https://discord.gg/S4NhfuWrf4
+
+### 3. GitHub issues
+https://github.com/akademiwengdev/LightBR/issues
