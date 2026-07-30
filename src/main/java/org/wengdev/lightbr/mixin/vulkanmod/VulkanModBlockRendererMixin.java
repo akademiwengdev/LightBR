@@ -13,8 +13,8 @@ import org.wengdev.lightbr.RenderChecker;
 @Mixin(BlockRenderer.class)
 public class VulkanModBlockRendererMixin {
     @Inject(method = "renderBlock", at = @At("HEAD"), cancellable = true, remap = false)
-    public void onRenderBlock(BlockState state, BlockPos blockPos, Vector3f pos, CallbackInfo ci) {
-        if (!RenderChecker.shouldRenderBlock(state, blockPos)) {
+    public void onRenderBlock(BlockState blockState, BlockPos blockPos, Vector3f pos, CallbackInfo ci) {
+        if (!RenderChecker.shouldRenderBlock(blockState, blockPos)) {
             ci.cancel();
         }
     }
