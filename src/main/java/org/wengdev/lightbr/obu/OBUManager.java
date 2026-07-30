@@ -1,6 +1,5 @@
 package org.wengdev.lightbr.obu;
 
-import dev.o7moon.openboatutils.OpenBoatUtils;
 import net.fabricmc.loader.api.FabricLoader;
 
 public class OBUManager {
@@ -9,19 +8,14 @@ public class OBUManager {
     }
 
     private static boolean hasObuCompatibilityBeenScanned = false;
-    private static boolean obuCompatible = false;
+    private static boolean isOBUInstanceExists = false;
 
     private static boolean isOBUCompatible() {
         if (!hasObuCompatibilityBeenScanned) {
-            try {
-                OpenBoatUtils.class.getDeclaredField("instance");
-                obuCompatible = true;
-            } catch (NoSuchFieldException e) {
-                obuCompatible = false;
-            }
+            isOBUInstanceExists = OBUFetcher.doesOBUInstanceExist();
             hasObuCompatibilityBeenScanned = true;
         }
-        return obuCompatible;
+        return isOBUInstanceExists;
     }
 
     /** OBU mod loaded but incompatible */

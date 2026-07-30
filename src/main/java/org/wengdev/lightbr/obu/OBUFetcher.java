@@ -14,6 +14,15 @@ public class OBUFetcher {
         ObuSlipperinessState.setDefaultSlipperinessSet(value);
     }
 
+    public static boolean doesOBUInstanceExist() {
+        try {
+            OpenBoatUtils.class.getDeclaredField("instance");
+            return true;
+        } catch (NoSuchFieldException e) {
+            return false;
+        }
+    }
+
     public static boolean isBlockSlippery(String blockId) {
         ResourceLocation id = ResourceLocation.tryParse(blockId);
         if (id == null) {
