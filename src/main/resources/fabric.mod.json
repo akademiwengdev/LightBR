@@ -23,7 +23,7 @@
   "mixins": [
     "lightbr.mixins.json"
   ],
-  "accessWidener": "template.ct",
+  "accessWidener": "template.accesswidener",
   "depends": {
     "fabricloader": ">=${loader}",
     "minecraft": "${minecraft}",

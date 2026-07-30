@@ -72,8 +72,8 @@ dependencies {
 loom {
     fabricModJsonPath = rootProject.file("src/main/resources/fabric.mod.json") // Useful for interface injection
     accessWidenerPath = sc.process(
-        rootProject.file("src/main/resources/template.ct"),
-        "build/processed.ct"
+        rootProject.file("src/main/resources/template.accesswidener"),
+        "build/processed.accesswidener"
     )
 
     decompilerOptions.named("vineflower") {
