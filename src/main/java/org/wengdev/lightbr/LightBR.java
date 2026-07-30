@@ -46,8 +46,6 @@ public class LightBR implements ClientModInitializer {
     private static final int PACKET_SET_CHUNK_XZ = 3;
     private static final int PACKET_SET_CHUNK_Y = 4;
     private static final int PACKET_SET_RENDER_ALL_LAVA = 5;
-    private static final int PACKET_SET_UNRENDER_BLOCK_ENTITIES = 6;
-    private static final int PACKET_SET_ALWAYS_RENDER_BLOCK_ENTITIES = 7;
     private static final int PACKET_SET_ALWAYS_RENDER_REGIONS = 8;
     private static final int PACKET_RESET_CACHE = 9;
     private static final int PACKET_RESET_SETTINGS = 10;
@@ -142,14 +140,6 @@ public class LightBR implements ClientModInitializer {
 
     public static boolean isRenderAllLavaServerControlled() {
         return serverControlled && serverContextPatch != null && serverContextPatch.renderAllLava != null;
-    }
-
-    public static boolean isUnrenderBlockEntitiesServerControlled() {
-        return serverControlled && serverContextPatch != null && serverContextPatch.unrenderBlockEntities != null;
-    }
-
-    public static boolean isRenderableBlockEntitiesServerControlled() {
-        return serverControlled && serverContextPatch != null && serverContextPatch.alwaysRenderBlockEntities != null;
     }
 
     public static boolean isAlwaysRenderRegionsServerControlled() {
@@ -249,9 +239,7 @@ public class LightBR implements ClientModInitializer {
                 config.chunkYRadius,
                 List.of(),
                 config.renderAllWater,
-                config.renderAllLava,
-                config.shouldUnrenderBlockEntities,
-                config.renderableBlockEntities == null ? List.of() : List.copyOf(config.renderableBlockEntities)
+                config.renderAllLava
         );
     }
 
@@ -312,19 +300,6 @@ public class LightBR implements ClientModInitializer {
                 case PACKET_SET_RENDER_ALL_LAVA -> {
                     boolean value = dataBuf.readBoolean();
                     context.client().execute(() -> applyServerOverride(patch -> patch.withRenderAllLava(value)));
-                }
-                case PACKET_SET_UNRENDER_BLOCK_ENTITIES -> {
-                    boolean value = dataBuf.readBoolean();
-                    context.client().execute(() -> applyServerOverride(patch -> patch.withUnrenderBlockEntities(value)));
-                }
-                case PACKET_SET_ALWAYS_RENDER_BLOCK_ENTITIES -> {
-                    int count = dataBuf.readVarInt();
-                    List<String> blockEntities = new java.util.ArrayList<>(count);
-                    for (int i = 0; i < count; i++) {
-                        blockEntities.add(dataBuf.readUtf());
-                    }
-                    List<String> resolved = List.copyOf(blockEntities);
-                    context.client().execute(() -> applyServerOverride(patch -> patch.withAlwaysRenderBlockEntities(resolved)));
                 }
                 case PACKET_SET_ALWAYS_RENDER_REGIONS -> {
                     int count = dataBuf.readVarInt();

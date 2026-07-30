@@ -29,8 +29,6 @@ This document specifies the custom payload protocol used to control LightBR rend
 | 3 | SET_CHUNK_XZ | S2C | varint |
 | 4 | SET_CHUNK_Y | S2C | varint |
 | 5 | SET_RENDER_ALL_LAVA | S2C | boolean |
-| 6 | SET_UNRENDER_BLOCK_ENTITIES | S2C | boolean |
-| 7 | SET_ALWAYS_RENDER_BLOCK_ENTITIES | S2C | list of strings |
 | 8 | SET_ALWAYS_RENDER_REGIONS | S2C | list of regions |
 | 9 | RESET_CACHE | S2C | no payload |
 | 10 | RESET_SETTINGS | S2C | no payload |
@@ -68,8 +66,6 @@ Payload layouts:
 - `SET_CHUNK_XZ`: `varint value`
 - `SET_CHUNK_Y`: `varint value`
 - `SET_RENDER_ALL_LAVA`: `boolean value`
-- `SET_UNRENDER_BLOCK_ENTITIES`: `boolean value`
-- `SET_ALWAYS_RENDER_BLOCK_ENTITIES`: `varint count` + `string * count`
 - `SET_ALWAYS_RENDER_REGIONS`: `varint count` + `Region * count`
 - `RESET_CACHE`: no additional fields
 - `RESET_SETTINGS`: no additional fields

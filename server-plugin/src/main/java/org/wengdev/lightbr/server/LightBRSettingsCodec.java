@@ -14,8 +14,6 @@ public final class LightBRSettingsCodec {
     public static final int PACKET_SET_CHUNK_XZ = 3;
     public static final int PACKET_SET_CHUNK_Y = 4;
     public static final int PACKET_SET_RENDER_ALL_LAVA = 5;
-    public static final int PACKET_SET_UNRENDER_BLOCK_ENTITIES = 6;
-    public static final int PACKET_SET_ALWAYS_RENDER_BLOCK_ENTITIES = 7;
     public static final int PACKET_SET_ALWAYS_RENDER_REGIONS = 8;
     public static final int PACKET_RESET_CACHE = 9;
     public static final int PACKET_RESET_SETTINGS = 10;
@@ -39,20 +37,6 @@ public final class LightBRSettingsCodec {
         try (DataOutputStream out = new DataOutputStream(bytes)) {
             writeVarInt(out, packetType);
             writeVarInt(out, value);
-        } catch (IOException e) {
-            throw new IllegalStateException("Failed to encode LightBR settings packet", e);
-        }
-        return bytes.toByteArray();
-    }
-
-    public static byte[] encodeBlockEntityListPacket(List<String> blockEntities) {
-        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-        try (DataOutputStream out = new DataOutputStream(bytes)) {
-            writeVarInt(out, PACKET_SET_ALWAYS_RENDER_BLOCK_ENTITIES);
-            writeVarInt(out, blockEntities.size());
-            for (String blockEntityId : blockEntities) {
-                writeString(out, blockEntityId);
-            }
         } catch (IOException e) {
             throw new IllegalStateException("Failed to encode LightBR settings packet", e);
         }

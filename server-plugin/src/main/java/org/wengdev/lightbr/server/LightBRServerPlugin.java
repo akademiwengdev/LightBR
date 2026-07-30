@@ -142,8 +142,6 @@ public class LightBRServerPlugin extends JavaPlugin implements PluginMessageList
                 chunkY,
                 base.renderAllWater,
                 base.renderAllLava,
-                base.unrenderBlockEntities,
-                base.alwaysRenderBlockEntities,
                 base.alwaysRenderRegions
         );
     }
@@ -211,14 +209,6 @@ public class LightBRServerPlugin extends JavaPlugin implements PluginMessageList
         }
         if (context.renderAllLava != null) {
             byte[] payload = LightBRSettingsCodec.encodeBooleanPacket(LightBRSettingsCodec.PACKET_SET_RENDER_ALL_LAVA, context.renderAllLava);
-            player.sendPluginMessage(this, SETTINGS_CHANNEL, payload);
-        }
-        if (context.unrenderBlockEntities != null) {
-            byte[] payload = LightBRSettingsCodec.encodeBooleanPacket(LightBRSettingsCodec.PACKET_SET_UNRENDER_BLOCK_ENTITIES, context.unrenderBlockEntities);
-            player.sendPluginMessage(this, SETTINGS_CHANNEL, payload);
-        }
-        if (context.alwaysRenderBlockEntities != null) {
-            byte[] payload = LightBRSettingsCodec.encodeBlockEntityListPacket(context.alwaysRenderBlockEntities);
             player.sendPluginMessage(this, SETTINGS_CHANNEL, payload);
         }
         if (context.alwaysRenderRegions != null) {
@@ -293,9 +283,6 @@ public class LightBRServerPlugin extends JavaPlugin implements PluginMessageList
 
     private RenderContextData withAddedRegion(RenderContextData base, RenderContextData.Region region) {
         RenderContextData resolved = base != null ? base : RenderContextData.demoDefault();
-        List<String> blockEntities = resolved.alwaysRenderBlockEntities != null
-                ? new ArrayList<>(resolved.alwaysRenderBlockEntities)
-                : null;
         List<RenderContextData.Region> regions = resolved.alwaysRenderRegions != null
                 ? new ArrayList<>(resolved.alwaysRenderRegions)
                 : new ArrayList<>();
@@ -306,8 +293,6 @@ public class LightBRServerPlugin extends JavaPlugin implements PluginMessageList
                 resolved.chunkYRadius,
                 resolved.renderAllWater,
                 resolved.renderAllLava,
-                resolved.unrenderBlockEntities,
-                blockEntities,
                 regions
         );
     }

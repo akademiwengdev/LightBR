@@ -5,7 +5,6 @@
   "compatibilityLevel": "JAVA_21",
   "plugin": "org.wengdev.lightbr.plugin.LightBRMixinPlugin",
   "client": [
-    "BlockEntityRenderDispatcherMixin",
     "BlockRenderManagerMixin",
     "obu.MutableContextMixin",
     "obu.OpenBoatUtilsMixin",

@@ -1,21 +1,12 @@
 package org.wengdev.lightbr.config;
 
-import dev.isxander.yacl3.api.ButtonOption;
-import dev.isxander.yacl3.api.ConfigCategory;
-import dev.isxander.yacl3.api.Option;
-import dev.isxander.yacl3.api.OptionDescription;
-import dev.isxander.yacl3.api.OptionGroup;
-import dev.isxander.yacl3.api.YetAnotherConfigLib;
+import dev.isxander.yacl3.api.*;
 import dev.isxander.yacl3.api.controller.IntegerSliderControllerBuilder;
 import dev.isxander.yacl3.api.controller.TickBoxControllerBuilder;
 import dev.isxander.yacl3.gui.YACLScreen;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import org.wengdev.lightbr.LightBR;
-import org.wengdev.lightbr.Utils;
-
-import java.util.List;
 
 public class YACLConfigScreen extends YACLScreen {
     public YACLConfigScreen(Screen parent) {
@@ -128,39 +119,6 @@ public class YACLConfigScreen extends YACLScreen {
                 )
                 .available(!LightBR.isRenderAllLavaServerControlled())
                 .controller(TickBoxControllerBuilder::create)
-                .build()
-        );
-
-        defaultSettingsGroup.option(Option.<Boolean>createBuilder()
-                .name(Component.translatable("lightbr.config.unrender_block_entities.name"))
-                .description(OptionDescription.of(Component.translatable("lightbr.config.unrender_block_entities.desc")))
-                .binding(
-                        false,
-                        () -> LightBR.config.shouldUnrenderBlockEntities,
-                        newValue -> LightBR.config.shouldUnrenderBlockEntities = newValue
-                )
-                .available(!LightBR.isUnrenderBlockEntitiesServerControlled())
-                .controller(TickBoxControllerBuilder::create)
-                .build()
-        );
-
-        defaultSettingsGroup.option(ButtonOption.createBuilder()
-                .name(Component.translatable("lightbr.config.renderable_block_entities.name"))
-                .text(Component.translatable("lightbr.config.renderable_block_entities.open_selector"))
-                .description(OptionDescription.of(Component.translatable(
-                        "lightbr.config.renderable_block_entities.desc"
-                )))
-                .available(!LightBR.isRenderableBlockEntitiesServerControlled())
-                .action((screen, option) -> {
-                    List<String> options = Utils.getBlockEntityBackedBlockIds();
-                    Minecraft.getInstance().setScreen(new SearchableMultiSelectScreen(
-                            screen,
-                            Component.translatable("lightbr.config.renderable_block_entities.title"),
-                            options,
-                            LightBR.config.renderableBlockEntities,
-                            () -> LightBR.config.saveAndReloadWorld()
-                    ));
-                })
                 .build()
         );
 
