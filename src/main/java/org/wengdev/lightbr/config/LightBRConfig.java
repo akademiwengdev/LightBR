@@ -36,7 +36,7 @@ public class LightBRConfig {
 
             Files.writeString(CONFIG_PATH, json, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
         } catch (IOException e) {
-            System.out.println("Failed to save LightBR config: " + e.getMessage());
+            LightBR.LOGGER.error("Failed to save LightBR config", e);
         }
     }
 
@@ -55,7 +55,7 @@ public class LightBRConfig {
                 return gson.fromJson(json, LightBRConfig.class);
             }
         } catch (IOException e) {
-            System.out.println("Failed to load LightBR config: " + e.getMessage());
+            LightBR.LOGGER.error("Failed to load LightBR config", e);
         }
 
         return new LightBRConfig();

@@ -1,6 +1,7 @@
 package org.wengdev.lightbr;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import com.mojang.logging.LogUtils;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
@@ -18,6 +19,7 @@ import net.minecraft.util.Tuple;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.phys.Vec3;
 import org.lwjgl.glfw.GLFW;
+import org.slf4j.Logger;
 import org.wengdev.lightbr.config.LightBRConfig;
 import org.wengdev.lightbr.obu.OBUManager;
 import org.wengdev.lightbr.network.ConfigPayload;
@@ -29,6 +31,8 @@ import java.util.List;
 import java.util.Properties;
 
 public class LightBR implements ClientModInitializer {
+    public static final Logger LOGGER = LogUtils.getLogger();
+
     public static LightBRConfig config;
     public static final int PROTOCOL_VERSION = loadProtocolVersion();
 
@@ -81,7 +85,7 @@ public class LightBR implements ClientModInitializer {
             }
             return Integer.parseInt(value.trim());
         } catch (Exception e) {
-            System.err.println("Failed to read LightBR protocol_version from properties: " + e.getMessage());
+            LOGGER.error("Failed to read LightBR protocol_version from properties", e);
             return null;
         }
     }
@@ -328,7 +332,7 @@ public class LightBR implements ClientModInitializer {
             FriendlyByteBuf dataBuf = payload.toPacketByteBuf();
             int packetType = dataBuf.readVarInt();
             if (packetType == CONFIG_PACKET_ACK) {
-                System.out.println(Component.translatable("lightbr.log.acknowledge_received").getString());
+                LOGGER.info("{}", Component.translatable("lightbr.log.acknowledge_received").getString());
                 context.client().execute(LightBR::applyServerControlAck);
             }
         });
@@ -337,7 +341,7 @@ public class LightBR implements ClientModInitializer {
             clearServerControl();
             TrackCache.clear();
             pendingAckTicks = -1;
-            System.out.println(Component.translatable("lightbr.log.disconnect_cleared").getString());
+            LOGGER.info("{}", Component.translatable("lightbr.log.disconnect_cleared").getString());
         });
 
         ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
