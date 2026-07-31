@@ -30,5 +30,7 @@
   "lightbr.select.no_matches": "No matches",
   "lightbr.log.disconnect_cleared": "[LightBR] Disconnected from world. Track cache cleared.",
   "lightbr.log.acknowledge_received": "[LightBR] Server acknowledged LightBR. Server control is now active.",
-  "lightbr.log.obu_incompatible": "[LightBR] WARNING: Incompatible OpenBoatUtils version. OBU integration will be disabled. Please update to at least OpenBoatUtils 0.5.0 to re-enable this."
+  "lightbr.log.obu_incompatible": "[LightBR] WARNING: Incompatible OpenBoatUtils version. OBU integration will be disabled. Please update to at least OpenBoatUtils 0.5.0 to re-enable this.",
+  "lightbr.actionbar.enabled": "[LightBR] Enabled",
+  "lightbr.actionbar.disabled": "[LightBR] Disabled"
 }

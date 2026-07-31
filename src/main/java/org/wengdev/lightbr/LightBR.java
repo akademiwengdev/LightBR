@@ -109,13 +109,18 @@ public class LightBR implements ClientModInitializer {
         }
     }
 
-    private static void toggleEnabled() {
+    private static void toggleEnabled(Minecraft client) {
         if (config == null) {
             return;
         }
         config.isEnabled = !config.isEnabled;
         updateRenderContextFromConfig();
         config.saveAndReloadWorld();
+
+        if (client.player != null) {
+            Component msg = Component.translatable(config.isEnabled ? "lightbr.actionbar.enabled" : "lightbr.actionbar.disabled");
+            client.player.displayClientMessage(msg, true);
+        }
     }
 
     public static boolean isServerControlled() {
@@ -272,7 +277,7 @@ public class LightBR implements ClientModInitializer {
                 }
             }
             while (toggleKey.consumeClick()) {
-                toggleEnabled();
+                toggleEnabled(client);
             }
         });
 
