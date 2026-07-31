@@ -123,6 +123,7 @@ public class LightBR implements ClientModInitializer {
 
         if (client.player != null) {
             Component msg = Component.translatable(config.isEnabled ? "lightbr.actionbar.enabled" : "lightbr.actionbar.disabled");
+            client.player.displayClientMessage(msg, false);
             client.player.displayClientMessage(msg, true);
         }
     }
