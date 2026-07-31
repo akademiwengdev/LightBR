@@ -66,6 +66,7 @@ public class LightBR implements ClientModInitializer {
     private static final String KEY_CATEGORY = "category.lightbr";
     //? }
     private static KeyMapping toggleKey;
+    private static KeyMapping configKey;
 
     private static int loadProtocolVersion() {
         Integer version = loadProtocolVersionFromProperties();
@@ -269,6 +270,12 @@ public class LightBR implements ClientModInitializer {
                 GLFW.GLFW_KEY_V,
                 KEY_CATEGORY
         ));
+        configKey = KeyBindingHelper.registerKeyBinding(new KeyMapping(
+                "key.lightbr.config",
+                InputConstants.Type.KEYSYM,
+                GLFW.GLFW_KEY_UNKNOWN,
+                KEY_CATEGORY
+        ));
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (pendingAckTicks >= 0) {
@@ -283,6 +290,9 @@ public class LightBR implements ClientModInitializer {
             }
             while (toggleKey.consumeClick()) {
                 toggleEnabled(client);
+            }
+            while (configKey.consumeClick()) {
+                client.setScreen(new org.wengdev.lightbr.config.YACLConfigScreen(client.screen));
             }
         });
 
