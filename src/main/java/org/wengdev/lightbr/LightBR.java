@@ -2,12 +2,14 @@ package org.wengdev.lightbr;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.logging.LogUtils;
+import it.unimi.dsi.fastutil.longs.LongList;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.SectionPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 //? if 1.21.11
@@ -113,6 +115,24 @@ public class LightBR implements ClientModInitializer {
         client.levelRenderer.allChanged();
     }
 
+    private static void processPendingSections(Minecraft client) {
+        LongList pending = TrackCache.drainPendingSections();
+        if (pending.isEmpty()) {
+            return;
+        }
+
+        for (int i = 0; i < pending.size(); i++) {
+            long sectionPos = pending.getLong(i);
+            int sx = SectionPos.x(sectionPos);
+            int sy = SectionPos.y(sectionPos);
+            int sz = SectionPos.z(sectionPos);
+            client.levelRenderer.setBlocksDirty(
+                sx << 4, sy << 4, sz << 4,
+                (sx << 4) + 15, (sy << 4) + 15, (sz << 4) + 15
+            );
+        }
+    }
+
     @Override
     public void onInitializeClient() {
         config = LightBRConfig.load();
@@ -139,6 +159,10 @@ public class LightBR implements ClientModInitializer {
             }
             while (configKey.consumeClick()) {
                 client.setScreen(new org.wengdev.lightbr.config.YACLConfigScreen(client.screen));
+            }
+
+            if (config != null && config.autoFixIncompleteChunks && client.levelRenderer != null) {
+                processPendingSections(client);
             }
         });
 

@@ -1,5 +1,7 @@
 package org.wengdev.lightbr;
 
+import it.unimi.dsi.fastutil.longs.LongArrayList;
+import it.unimi.dsi.fastutil.longs.LongList;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
@@ -10,6 +12,7 @@ import java.util.concurrent.locks.StampedLock;
 public class TrackCache {
     private static final LongOpenHashSet TRACK_SECTIONS = new LongOpenHashSet();
     private static final LongOpenHashSet RENDERABLE_SECTIONS = new LongOpenHashSet();
+    private static final LongOpenHashSet PENDING_SECTIONS = new LongOpenHashSet();
     private static final StampedLock LOCK = new StampedLock();
 
     public static void markTrackChunk(long chunkKey, int sectionY) {
@@ -28,7 +31,10 @@ public class TrackCache {
             for (int x = cx - chunkRadius; x <= cx + chunkRadius; x++) {
                 for (int y = sectionY - sectionRadius; y <= sectionY + sectionRadius; y++) {
                     for (int z = cz - chunkRadius; z <= cz + chunkRadius; z++) {
-                        RENDERABLE_SECTIONS.add(SectionPos.asLong(x, y, z));
+                        long neighborKey = SectionPos.asLong(x, y, z);
+                        if (RENDERABLE_SECTIONS.add(neighborKey)) {
+                            PENDING_SECTIONS.add(neighborKey);
+                        }
                     }
                 }
             }
@@ -51,6 +57,21 @@ public class TrackCache {
         try {
             TRACK_SECTIONS.clear();
             RENDERABLE_SECTIONS.clear();
+            PENDING_SECTIONS.clear();
+        } finally {
+            LOCK.unlockWrite(stamp);
+        }
+    }
+
+    public static LongList drainPendingSections() {
+        long stamp = LOCK.writeLock();
+        try {
+            if (PENDING_SECTIONS.isEmpty()) {
+                return LongList.of();
+            }
+            LongList result = new LongArrayList(PENDING_SECTIONS);
+            PENDING_SECTIONS.clear();
+            return result;
         } finally {
             LOCK.unlockWrite(stamp);
         }

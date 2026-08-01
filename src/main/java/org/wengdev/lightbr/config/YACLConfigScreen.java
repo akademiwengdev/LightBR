@@ -19,6 +19,7 @@ public class YACLConfigScreen extends YACLScreen {
     public static YetAnotherConfigLib generateConfigScreen() {
         final OptionGroup generalGroup = createGeneralGroup();
         final OptionGroup renderGroup = createDefaultSettingsGroup();
+        final OptionGroup experimentalGroup = createExperimentalGroup();
         final OptionGroup appliedValuesGroup = createAppliedValuesGroup();
 
         return YetAnotherConfigLib.createBuilder()
@@ -28,6 +29,7 @@ public class YACLConfigScreen extends YACLScreen {
                                 .name(Component.translatable("lightbr.config.category"))
                                 .group(generalGroup)
                                 .group(renderGroup)
+                                .group(experimentalGroup)
                                 .group(appliedValuesGroup)
                                 .build()
                 )
@@ -123,6 +125,27 @@ public class YACLConfigScreen extends YACLScreen {
         );
 
         return defaultSettingsGroup.build();
+    }
+
+    private static OptionGroup createExperimentalGroup() {
+        final OptionGroup.Builder experimentalGroup = OptionGroup.createBuilder();
+        experimentalGroup.name(Component.translatable("lightbr.config.experimental_group.name"));
+        experimentalGroup.description(OptionDescription.of(Component.translatable("lightbr.config.experimental_group.desc")));
+        experimentalGroup.collapsed(false);
+
+        experimentalGroup.option(Option.<Boolean>createBuilder()
+                .name(Component.translatable("lightbr.config.auto_fix_incomplete_chunks.name"))
+                .description(OptionDescription.of(Component.translatable("lightbr.config.auto_fix_incomplete_chunks.desc")))
+                .binding(
+                        false,
+                        () -> LightBR.config.autoFixIncompleteChunks,
+                        newValue -> LightBR.config.autoFixIncompleteChunks = newValue
+                )
+                .controller(TickBoxControllerBuilder::create)
+                .build()
+        );
+
+        return experimentalGroup.build();
     }
 
     private static OptionGroup createAppliedValuesGroup() {

@@ -30,6 +30,9 @@ public class LightBRConfig {
     @SerializedName("render_lava")
     public boolean renderAllLava = true;
 
+    @SerializedName("auto_fix_incomplete_chunks")
+    public boolean autoFixIncompleteChunks = false;
+
     public void save() {
         try {
             final Gson gson = new GsonBuilder().setPrettyPrinting().create();
