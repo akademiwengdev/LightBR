@@ -23,15 +23,15 @@ This document specifies the custom payload protocol used to control LightBR rend
 ### Settings Channel (`lightbr:settings`)
 
 | ID | Name | Direction | Payload |
-| --- | --- | --- | --- |
-| 1 | SET_ENABLED | S2C | boolean |
-| 2 | SET_RENDER_ALL_WATER | S2C | boolean |
-| 3 | SET_CHUNK_XZ | S2C | varint |
-| 4 | SET_CHUNK_Y | S2C | varint |
-| 5 | SET_RENDER_ALL_LAVA | S2C | boolean |
-| 8 | SET_ALWAYS_RENDER_REGIONS | S2C | list of regions |
-| 9 | RESET_CACHE | S2C | no payload |
-| 10 | RESET_SETTINGS | S2C | no payload |
+|----| --- | --- | --- |
+| 1  | SET_ENABLED | S2C | boolean |
+| 2  | SET_RENDER_ALL_WATER | S2C | boolean |
+| 3  | SET_CHUNK_XZ | S2C | varint |
+| 4  | SET_CHUNK_Y | S2C | varint |
+| 5  | SET_RENDER_ALL_LAVA | S2C | boolean |
+| 6  | SET_ALWAYS_RENDER_REGIONS | S2C | list of regions |
+| 7  | RESET_CACHE | S2C | no payload |
+| 8  | RESET_SETTINGS | S2C | no payload |
 
 Notes:
 - The client sends `ACK` once on join over `lightbr:config`. This packet contains the protocol version client used.

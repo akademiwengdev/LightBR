@@ -13,9 +13,9 @@ public class SettingsPayloadHandlers {
     public static final int SET_CHUNK_XZ = 3;
     public static final int SET_CHUNK_Y = 4;
     public static final int SET_RENDER_ALL_LAVA = 5;
-    public static final int SET_ALWAYS_RENDER_REGIONS = 8;
-    public static final int RESET_CACHE = 9;
-    public static final int RESET_SETTINGS = 10;
+    public static final int SET_ALWAYS_RENDER_REGIONS = 6;
+    public static final int RESET_CACHE = 7;
+    public static final int RESET_SETTINGS = 8;
 
     private final Map<Integer, PayloadHandler> handlers = Map.of(
             SET_ENABLED, new SetEnabledHandler(),

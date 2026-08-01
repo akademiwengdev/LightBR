@@ -23,7 +23,7 @@ import java.util.HashMap;
 import java.util.Properties;
 
 public class LightBR implements ClientModInitializer {
-    private static final int DEFAULT_PROTOCOL_VERSION = 3;
+    private static final int DEFAULT_PROTOCOL_VERSION = 4;
     public static final Logger LOGGER = LogUtils.getLogger();
 
     public static LightBRConfig config;

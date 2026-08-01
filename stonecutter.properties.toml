@@ -7,7 +7,7 @@ mod.version = "0.4"
 deps.fabric_loader = "0.16.14"
 loomx.loom_version = "1.17-SNAPSHOT"
 
-lightbr.protocol_version = "3"
+lightbr.protocol_version = "4"
 
 ["1.21.4"]
 # Mod compatibility range in fabric.mod.json
