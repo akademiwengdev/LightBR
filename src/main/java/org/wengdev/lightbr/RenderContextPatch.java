@@ -5,26 +5,15 @@ import net.minecraft.world.phys.Vec3;
 
 import java.util.List;
 
-public class RenderContextPatch {
-    public final Boolean isEnabled;
-    public final Integer chunkXZRadius;
-    public final Integer chunkYRadius;
-    public final Boolean renderAllWater;
-    public final Boolean renderAllLava;
-    public final List<Tuple<Vec3, Vec3>> alwaysRenderRegions;
-
-    public RenderContextPatch(Boolean isEnabled, Integer chunkXZRadius, Integer chunkYRadius, Boolean renderAllWater, Boolean renderAllLava, List<Tuple<Vec3, Vec3>> alwaysRenderRegions) {
-        this.isEnabled = isEnabled;
-        this.chunkXZRadius = chunkXZRadius;
-        this.chunkYRadius = chunkYRadius;
-        this.renderAllWater = renderAllWater;
-        this.renderAllLava = renderAllLava;
-        this.alwaysRenderRegions = alwaysRenderRegions;
-    }
-
-    public static RenderContextPatch empty() {
-        return new RenderContextPatch(null, null, null, null, null, null);
-    }
+public record RenderContextPatch(
+        Boolean isEnabled,
+        Integer chunkXZRadius,
+        Integer chunkYRadius,
+        Boolean renderAllWater,
+        Boolean renderAllLava,
+        List<Tuple<Vec3, Vec3>> alwaysRenderRegions
+) {
+    public static RenderContextPatch EMPTY = new RenderContextPatch(null, null, null, null, null, null);
 
     public RenderContextPatch withEnabled(Boolean value) {
         return new RenderContextPatch(value, chunkXZRadius, chunkYRadius, renderAllWater, renderAllLava, alwaysRenderRegions);

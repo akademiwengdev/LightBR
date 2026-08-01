@@ -8,7 +8,7 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 
-public record SettingsPayload(byte[] data) implements CustomPacketPayload {
+public record SettingsPayload(byte[] data) implements LightBRPayload {
     public static final Type<SettingsPayload> ID = new Type<>(ResourceLocation.fromNamespaceAndPath("lightbr", "settings"));
     public static final StreamCodec<RegistryFriendlyByteBuf, SettingsPayload> CODEC = new StreamCodec<>() {
         @Override

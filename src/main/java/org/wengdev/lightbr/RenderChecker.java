@@ -12,7 +12,7 @@ import java.util.List;
 
 public class RenderChecker {
     public static boolean shouldRenderBlock(BlockState state, BlockPos pos) {
-        RenderContext context = LightBR.getRenderContext();
+        RenderContext context = RenderContextManager.get();
         if (!LightBR.config.isEnabled || !context.isEnabled || OBUManager.isDefaultSlipperinessSet()) {
             return true;
         }

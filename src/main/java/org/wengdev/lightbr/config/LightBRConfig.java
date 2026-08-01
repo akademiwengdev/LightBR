@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.SerializedName;
 import net.minecraft.client.Minecraft;
 import org.wengdev.lightbr.LightBR;
+import org.wengdev.lightbr.RenderContextManager;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -40,10 +41,15 @@ public class LightBRConfig {
         }
     }
 
-    public void saveAndReloadWorld() {
+    public void saveAndReloadAll() {
         save();
 
-        LightBR.updateRenderContextFromConfig();
+        RenderContextManager.reloadContextAndClearCache();
+        Minecraft.getInstance().levelRenderer.allChanged();
+    }
+
+    public void saveAndReloadWorldOnly() {
+        save();
         Minecraft.getInstance().levelRenderer.allChanged();
     }
 

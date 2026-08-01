@@ -69,12 +69,12 @@ public class TrackCache {
     }
 
     private static int getChunkRadius() {
-        RenderContext context = LightBR.getRenderContext();
+        RenderContext context = RenderContextManager.get();
         return Math.max(0, context.chunkXZRadius);
     }
 
     private static int getSectionRadius() {
-        RenderContext context = LightBR.getRenderContext();
+        RenderContext context = RenderContextManager.get();
         return Math.max(0, context.chunkYRadius);
     }
 

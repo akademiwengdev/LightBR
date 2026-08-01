@@ -10,10 +10,6 @@ public class OBUFetcher {
         return ObuSlipperinessState.isDefaultSlipperinessSet();
     }
 
-    public static void setIsDefaultSlipperinessSet(boolean value) {
-        ObuSlipperinessState.setDefaultSlipperinessSet(value);
-    }
-
     public static boolean doesOBUInstanceExist() {
         try {
             OpenBoatUtils.class.getDeclaredField("instance");
