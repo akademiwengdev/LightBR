@@ -164,6 +164,8 @@ public class LightBR implements ClientModInitializer {
             if (config != null && config.autoFixIncompleteChunks && client.levelRenderer != null) {
                 processPendingSections(client);
             }
+
+            ServerControlManager.flushPendingOverrides();
         });
 
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {

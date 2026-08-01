@@ -22,7 +22,7 @@ public class SetAlwaysRenderRegionsHandler implements PayloadHandler {
         }
         List<Tuple<Vec3, Vec3>> resolved = List.copyOf(regions);
         Minecraft.getInstance().execute(
-                () -> ServerControlManager.applyServerOverride(patch -> patch.withAlwaysRenderRegions(resolved))
+                () -> ServerControlManager.queueServerOverride(patch -> patch.withAlwaysRenderRegions(resolved))
         );
     }
 }

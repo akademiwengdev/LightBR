@@ -11,7 +11,7 @@ public class SetRenderAllWaterHandler implements PayloadHandler {
     public void handle(FriendlyByteBuf buf, ClientPlayNetworking.Context context) {
         boolean value = buf.readBoolean();
         Minecraft.getInstance().execute(
-                () -> ServerControlManager.applyServerOverride(patch -> patch.withRenderAllWater(value))
+                () -> ServerControlManager.queueServerOverride(patch -> patch.withRenderAllWater(value))
         );
     }
 }

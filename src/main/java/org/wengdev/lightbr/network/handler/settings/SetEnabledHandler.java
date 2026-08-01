@@ -11,7 +11,7 @@ public class SetEnabledHandler implements PayloadHandler {
     public void handle(FriendlyByteBuf buf, ClientPlayNetworking.Context context) {
         boolean value = buf.readBoolean();
         Minecraft.getInstance().execute(
-                () -> ServerControlManager.applyServerOverride(patch -> patch.withEnabled(value))
+                () -> ServerControlManager.queueServerOverride(patch -> patch.withEnabled(value))
         );
     }
 }

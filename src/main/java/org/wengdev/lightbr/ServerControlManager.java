@@ -3,6 +3,9 @@ package org.wengdev.lightbr;
 import org.wengdev.lightbr.network.ConfigPayloadHandlers;
 import org.wengdev.lightbr.network.SettingsPayloadHandlers;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.function.Function;
 
 public class ServerControlManager {
@@ -10,6 +13,9 @@ public class ServerControlManager {
 
     private static final ConfigPayloadHandlers configPayloadHandlers = new ConfigPayloadHandlers();
     private static final SettingsPayloadHandlers settingsPayloadHandlers = new SettingsPayloadHandlers();
+
+    private static final List<Function<RenderContextPatch, RenderContextPatch>> pendingUpdaters = Collections.synchronizedList(new ArrayList<>());
+    private static boolean pendingCacheReset = false;
 
     public static void init() {
         configPayloadHandlers.registerChannels();
@@ -23,9 +29,30 @@ public class ServerControlManager {
         configPayloadHandlers.sendAcknowledgement(LightBR.PROTOCOL_VERSION);
     }
 
-    public static void applyServerOverride(Function<RenderContextPatch, RenderContextPatch> updater) {
-        RenderContextPatch base = serverContextPatch != null ? serverContextPatch : RenderContextPatch.EMPTY;
-        serverContextPatch = updater.apply(base);
+    public static void queueServerOverride(Function<RenderContextPatch, RenderContextPatch> updater) {
+        pendingUpdaters.add(updater);
+    }
+
+    public static void queueCacheReset() {
+        pendingCacheReset = true;
+    }
+
+    public static void flushPendingOverrides() {
+        if (pendingUpdaters.isEmpty() && !pendingCacheReset) {
+            return;
+        }
+
+        if (!pendingUpdaters.isEmpty()) {
+            RenderContextPatch base = serverContextPatch != null ? serverContextPatch : RenderContextPatch.EMPTY;
+            for (Function<RenderContextPatch, RenderContextPatch> updater : pendingUpdaters) {
+                base = updater.apply(base);
+            }
+            serverContextPatch = base;
+        }
+
+        pendingUpdaters.clear();
+        pendingCacheReset = false;
+
         RenderContextManager.reloadRenderContext();
         LightBR.clearCacheAndReload();
     }

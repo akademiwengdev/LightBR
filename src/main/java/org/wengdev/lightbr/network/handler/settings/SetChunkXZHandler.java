@@ -11,7 +11,7 @@ public class SetChunkXZHandler implements PayloadHandler {
     public void handle(FriendlyByteBuf buf, ClientPlayNetworking.Context context) {
         int value = buf.readVarInt();
         Minecraft.getInstance().execute(
-                () -> ServerControlManager.applyServerOverride(patch -> patch.withChunkXZRadius(value))
+                () -> ServerControlManager.queueServerOverride(patch -> patch.withChunkXZRadius(value))
         );
     }
 }

@@ -211,7 +211,7 @@ public class LightBRServerPlugin extends JavaPlugin implements PluginMessageList
             byte[] payload = LightBRSettingsCodec.encodeBooleanPacket(LightBRSettingsCodec.PACKET_SET_RENDER_ALL_LAVA, context.renderAllLava);
             player.sendPluginMessage(this, SETTINGS_CHANNEL, payload);
         }
-        if (context.alwaysRenderRegions != null) {
+        if (context.alwaysRenderRegions != null && !context.alwaysRenderRegions.isEmpty()) {
             byte[] payload = LightBRSettingsCodec.encodeRegionListPacket(context.alwaysRenderRegions);
             player.sendPluginMessage(this, SETTINGS_CHANNEL, payload);
         }

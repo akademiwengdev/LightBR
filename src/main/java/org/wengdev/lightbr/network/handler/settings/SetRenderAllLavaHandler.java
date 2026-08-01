@@ -11,7 +11,7 @@ public class SetRenderAllLavaHandler implements PayloadHandler {
     public void handle(FriendlyByteBuf buf, ClientPlayNetworking.Context context) {
         boolean value = buf.readBoolean();
         Minecraft.getInstance().execute(
-                () -> ServerControlManager.applyServerOverride(patch -> patch.withRenderAllLava(value))
+                () -> ServerControlManager.queueServerOverride(patch -> patch.withRenderAllLava(value))
         );
     }
 }

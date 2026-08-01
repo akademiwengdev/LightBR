@@ -11,7 +11,7 @@ public class SetChunkYHandler implements PayloadHandler {
     public void handle(FriendlyByteBuf buf, ClientPlayNetworking.Context context) {
         int value = buf.readVarInt();
         Minecraft.getInstance().execute(
-                () -> ServerControlManager.applyServerOverride(patch -> patch.withChunkYRadius(value))
+                () -> ServerControlManager.queueServerOverride(patch -> patch.withChunkYRadius(value))
         );
     }
 }
