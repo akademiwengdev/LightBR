@@ -2,7 +2,7 @@
 mod.id = "lightbr"
 mod.name = "LightBR"
 mod.group = "org.wengdev"
-mod.version = "0.4"
+mod.version = "0.5"
 
 deps.fabric_loader = "0.16.14"
 loomx.loom_version = "1.17-SNAPSHOT"
