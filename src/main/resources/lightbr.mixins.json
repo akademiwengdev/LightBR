@@ -9,7 +9,9 @@
     "obu.MutableContextMixin",
     "obu.OpenBoatUtilsMixin",
     "sodium.SodiumBlockRendererMixin",
-    "vulkanmod.VulkanModBlockRendererMixin"
+    "sodium.SodiumFluidRendererMixin",
+    "vulkanmod.VulkanModBlockRendererMixin",
+    "vulkanmod.VulkanModFluidRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1

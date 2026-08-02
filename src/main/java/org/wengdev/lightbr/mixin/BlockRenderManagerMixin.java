@@ -10,11 +10,13 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.FluidState;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.wengdev.lightbr.RenderChecker;
+
 
 //? if 1.21.11
 //import java.util.List;
@@ -36,4 +38,11 @@ public class BlockRenderManagerMixin {
         }
     }
     //? }
+
+    @Inject(method="renderLiquid", at = @At("HEAD"), cancellable = true)
+    private void onRenderLiquid(BlockPos blockPos, BlockAndTintGetter blockAndTintGetter, VertexConsumer vertexConsumer, BlockState blockState, FluidState fluidState, CallbackInfo ci) {
+        if (!RenderChecker.shouldRenderBlock(blockState, blockPos)) {
+            ci.cancel();
+        }
+    }
 }

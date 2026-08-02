@@ -19,11 +19,11 @@ public class LightBRMixinPlugin implements IMixinConfigPlugin {
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-        if (mixinClassName.endsWith("SodiumBlockRendererMixin")) {
+        if (mixinClassName.contains(".sodium.")) {
             return FabricLoader.getInstance().isModLoaded("sodium");
         }
 
-        if (mixinClassName.endsWith("VulkanModBlockRendererMixin")) {
+        if (mixinClassName.contains(".vulkanmod.")) {
             return FabricLoader.getInstance().isModLoaded("vulkanmod");
         }
 
