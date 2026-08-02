@@ -29,9 +29,12 @@ This document specifies the custom payload protocol used to control LightBR rend
 | 3  | SET_CHUNK_XZ | S2C | varint |
 | 4  | SET_CHUNK_Y | S2C | varint |
 | 5  | SET_RENDER_ALL_LAVA | S2C | boolean |
-| 6  | SET_ALWAYS_RENDER_REGIONS | S2C | list of regions |
+| 6  | SET_ALWAYS_RENDER_REGIONS | S2C | varint id + list of regions |
 | 7  | RESET_CACHE | S2C | no payload |
 | 8  | RESET_SETTINGS | S2C | no payload |
+| 9  | BULK_SET_CONTEXT | S2C | varint count + sub-packets |
+| 10 | ADD_ALWAYS_RENDER_REGIONS | S2C | varint id + list of regions |
+| 11 | REMOVE_ALWAYS_RENDER_REGIONS | S2C | varint id |
 
 Notes:
 - The client sends `ACK` once on join over `lightbr:config`. This packet contains the protocol version client used.
@@ -66,9 +69,12 @@ Payload layouts:
 - `SET_CHUNK_XZ`: `varint value`
 - `SET_CHUNK_Y`: `varint value`
 - `SET_RENDER_ALL_LAVA`: `boolean value`
-- `SET_ALWAYS_RENDER_REGIONS`: `varint count` + `Region * count`
+- `SET_ALWAYS_RENDER_REGIONS`: `varint id` + `varint count` + `Region * count`
 - `RESET_CACHE`: no additional fields
 - `RESET_SETTINGS`: no additional fields
+- `BULK_SET_CONTEXT`: `varint count` + `SubPacket * count`
+- `ADD_ALWAYS_RENDER_REGIONS`: `varint id` + `varint count` + `Region * count`
+- `REMOVE_ALWAYS_RENDER_REGIONS`: `varint id`
 
 ### Region Layout
 
@@ -82,6 +88,25 @@ double bz
 ```
 
 Regions are axis-aligned boxes. The ordering is preserved as written (no automatic min/max normalization).
+
+### Bulk Set Context Layout
+
+```
+varint count
+SubPacket * count
+```
+
+Each `SubPacket` is a complete settings sub-packet (starting with its own `varint packetType` followed by its payload), encoded identically to a standalone settings packet. The bulk packet dispatches each sub-packet to its respective handler. Sub-packets of type `BULK_SET_CONTEXT` (9) are not allowed inside a bulk packet to prevent recursion.
+
+### Region List Operations
+
+Region lists are identified by an integer ID. The server can manage multiple independent region lists:
+
+- `SET_ALWAYS_RENDER_REGIONS` (6): Replaces the entire region list at the given ID. If no list exists at that ID, creates one.
+- `ADD_ALWAYS_RENDER_REGIONS` (10): Appends regions to the list at the given ID. If no list exists at that ID, creates one.
+- `REMOVE_ALWAYS_RENDER_REGIONS` (11): Removes the entire region list at the given ID.
+
+On the client, all region lists are flattened into a single list for rendering. A block is rendered if it falls within any region from any list.
 
 ## Behavioral Rules
 
@@ -98,6 +123,9 @@ Regions are axis-aligned boxes. The ordering is preserved as written (no automat
   - clear all server overrides and revert to local defaults
   - clear render caches
   - reload the world renderer
+- When a client receives `BULK_SET_CONTEXT`, it must:
+  - process each sub-packet as if it were received individually
+  - all sub-packets are queued and applied together on the next flush
 
 ## Implementation References
 

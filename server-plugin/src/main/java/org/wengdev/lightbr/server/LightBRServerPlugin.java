@@ -12,8 +12,10 @@ import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 public class LightBRServerPlugin extends JavaPlugin implements PluginMessageListener {
     private static final String SETTINGS_CHANNEL = "lightbr:settings";
@@ -52,7 +54,7 @@ public class LightBRServerPlugin extends JavaPlugin implements PluginMessageList
             int packetType = readVarInt(in);
             if (CONFIG_CHANNEL.equals(channel) && packetType == LightBRSettingsCodec.CONFIG_PACKET_ACK) {
                 this.getLogger().info("Received config ACK from " + player.getName());
-                readVarInt(in); // client protocol version (not used yet)
+                readVarInt(in);
                 Bukkit.getScheduler().runTaskLater(this, () -> {
                     if (!player.isOnline()) {
                         return;
@@ -78,7 +80,7 @@ public class LightBRServerPlugin extends JavaPlugin implements PluginMessageList
         }
 
         if (args.length == 0) {
-            sender.sendMessage("Usage: /lightbrsettings <setcontext|resetcache|addregion> ...");
+            sender.sendMessage("Usage: /lightbrsettings <setcontext|resetcache|addregion|setregion|removeregion> ...");
             return true;
         }
 
@@ -105,16 +107,66 @@ public class LightBRServerPlugin extends JavaPlugin implements PluginMessageList
                 sendResetCache(target);
                 sender.sendMessage("Sent RESET_CACHE to " + target.getName());
             }
-            case "addregion" -> {
-                RenderContextData.Region region = resolveRegionFromArgs(sender, args);
-                if (region == null) {
-                    sender.sendMessage("Usage: /lightbrsettings addregion [player] [radius] [height] | /lightbrsettings addregion <ax> <ay> <az> <bx> <by> <bz>");
+            case "setregion" -> {
+                if (args.length < 3) {
+                    sender.sendMessage("Usage: /lightbrsettings setregion <id> <ax> <ay> <az> <bx> <by> <bz> | /lightbrsettings setregion <id> [player] [radius] [height]");
                     return true;
                 }
-                currentContext = withAddedRegion(currentContext, region);
-                sender.sendMessage("Added always-render region to context.");
+                int id;
+                try {
+                    id = Integer.parseInt(args[1]);
+                } catch (NumberFormatException e) {
+                    sender.sendMessage("Invalid region ID: " + args[1]);
+                    return true;
+                }
+                String[] regionArgs = new String[args.length - 1];
+                System.arraycopy(args, 1, regionArgs, 0, regionArgs.length);
+                RenderContextData.Region region = resolveRegionFromArgs(sender, regionArgs);
+                if (region == null) {
+                    sender.sendMessage("Usage: /lightbrsettings setregion <id> <ax> <ay> <az> <bx> <by> <bz> | /lightbrsettings setregion <id> [player] [radius] [height]");
+                    return true;
+                }
+                currentContext = withSetRegion(currentContext, id, region);
+                sender.sendMessage("Set always-render region list " + id + " in context.");
             }
-            default -> sender.sendMessage("Unknown subcommand. Use setcontext, resetcache, or addregion.");
+            case "addregion" -> {
+                if (args.length < 3) {
+                    sender.sendMessage("Usage: /lightbrsettings addregion <id> <ax> <ay> <az> <bx> <by> <bz> | /lightbrsettings addregion <id> [player] [radius] [height]");
+                    return true;
+                }
+                int id;
+                try {
+                    id = Integer.parseInt(args[1]);
+                } catch (NumberFormatException e) {
+                    sender.sendMessage("Invalid region ID: " + args[1]);
+                    return true;
+                }
+                String[] regionArgs = new String[args.length - 1];
+                System.arraycopy(args, 1, regionArgs, 0, regionArgs.length);
+                RenderContextData.Region region = resolveRegionFromArgs(sender, regionArgs);
+                if (region == null) {
+                    sender.sendMessage("Usage: /lightbrsettings addregion <id> <ax> <ay> <az> <bx> <by> <bz> | /lightbrsettings addregion <id> [player] [radius] [height]");
+                    return true;
+                }
+                currentContext = withAddedRegion(currentContext, id, region);
+                sender.sendMessage("Added always-render region to list " + id + " in context.");
+            }
+            case "removeregion" -> {
+                if (args.length < 2) {
+                    sender.sendMessage("Usage: /lightbrsettings removeregion <id>");
+                    return true;
+                }
+                int id;
+                try {
+                    id = Integer.parseInt(args[1]);
+                } catch (NumberFormatException e) {
+                    sender.sendMessage("Invalid region ID: " + args[1]);
+                    return true;
+                }
+                currentContext = withRemovedRegion(currentContext, id);
+                sender.sendMessage("Removed always-render region list " + id + " from context.");
+            }
+            default -> sender.sendMessage("Unknown subcommand. Use setcontext, resetcache, setregion, addregion, or removeregion.");
         }
 
         return true;
@@ -191,28 +243,31 @@ public class LightBRServerPlugin extends JavaPlugin implements PluginMessageList
         if (context == null) {
             return;
         }
+        List<byte[]> subPackets = new ArrayList<>();
         if (context.enabled != null) {
-            byte[] payload = LightBRSettingsCodec.encodeBooleanPacket(LightBRSettingsCodec.PACKET_SET_ENABLED, context.enabled);
-            player.sendPluginMessage(this, SETTINGS_CHANNEL, payload);
+            subPackets.add(LightBRSettingsCodec.encodeBooleanPacket(LightBRSettingsCodec.PACKET_SET_ENABLED, context.enabled));
         }
         if (context.chunkXZRadius != null) {
-            byte[] payload = LightBRSettingsCodec.encodeVarIntPacket(LightBRSettingsCodec.PACKET_SET_CHUNK_XZ, context.chunkXZRadius);
-            player.sendPluginMessage(this, SETTINGS_CHANNEL, payload);
+            subPackets.add(LightBRSettingsCodec.encodeVarIntPacket(LightBRSettingsCodec.PACKET_SET_CHUNK_XZ, context.chunkXZRadius));
         }
         if (context.chunkYRadius != null) {
-            byte[] payload = LightBRSettingsCodec.encodeVarIntPacket(LightBRSettingsCodec.PACKET_SET_CHUNK_Y, context.chunkYRadius);
-            player.sendPluginMessage(this, SETTINGS_CHANNEL, payload);
+            subPackets.add(LightBRSettingsCodec.encodeVarIntPacket(LightBRSettingsCodec.PACKET_SET_CHUNK_Y, context.chunkYRadius));
         }
         if (context.renderAllWater != null) {
-            byte[] payload = LightBRSettingsCodec.encodeBooleanPacket(LightBRSettingsCodec.PACKET_SET_RENDER_ALL_WATER, context.renderAllWater);
-            player.sendPluginMessage(this, SETTINGS_CHANNEL, payload);
+            subPackets.add(LightBRSettingsCodec.encodeBooleanPacket(LightBRSettingsCodec.PACKET_SET_RENDER_ALL_WATER, context.renderAllWater));
         }
         if (context.renderAllLava != null) {
-            byte[] payload = LightBRSettingsCodec.encodeBooleanPacket(LightBRSettingsCodec.PACKET_SET_RENDER_ALL_LAVA, context.renderAllLava);
-            player.sendPluginMessage(this, SETTINGS_CHANNEL, payload);
+            subPackets.add(LightBRSettingsCodec.encodeBooleanPacket(LightBRSettingsCodec.PACKET_SET_RENDER_ALL_LAVA, context.renderAllLava));
         }
-        if (context.alwaysRenderRegions != null && !context.alwaysRenderRegions.isEmpty()) {
-            byte[] payload = LightBRSettingsCodec.encodeRegionListPacket(context.alwaysRenderRegions);
+        if (context.alwaysRenderRegions != null) {
+            for (Map.Entry<Integer, List<RenderContextData.Region>> entry : context.alwaysRenderRegions.entrySet()) {
+                if (!entry.getValue().isEmpty()) {
+                    subPackets.add(LightBRSettingsCodec.encodeRegionListPacket(entry.getKey(), entry.getValue()));
+                }
+            }
+        }
+        if (!subPackets.isEmpty()) {
+            byte[] payload = LightBRSettingsCodec.encodeBulkPacket(subPackets);
             player.sendPluginMessage(this, SETTINGS_CHANNEL, payload);
         }
     }
@@ -281,12 +336,49 @@ public class LightBRServerPlugin extends JavaPlugin implements PluginMessageList
         return new RenderContextData.Region(ax, ay, az, bx, by, bz);
     }
 
-    private RenderContextData withAddedRegion(RenderContextData base, RenderContextData.Region region) {
+    private RenderContextData withSetRegion(RenderContextData base, int id, RenderContextData.Region region) {
         RenderContextData resolved = base != null ? base : RenderContextData.demoDefault();
-        List<RenderContextData.Region> regions = resolved.alwaysRenderRegions != null
-                ? new ArrayList<>(resolved.alwaysRenderRegions)
-                : new ArrayList<>();
-        regions.add(region);
+        Map<Integer, List<RenderContextData.Region>> regions = resolved.alwaysRenderRegions != null
+                ? new HashMap<>(resolved.alwaysRenderRegions)
+                : new HashMap<>();
+        List<RenderContextData.Region> list = new ArrayList<>();
+        list.add(region);
+        regions.put(id, list);
+        return new RenderContextData(
+                resolved.enabled,
+                resolved.chunkXZRadius,
+                resolved.chunkYRadius,
+                resolved.renderAllWater,
+                resolved.renderAllLava,
+                regions
+        );
+    }
+
+    private RenderContextData withAddedRegion(RenderContextData base, int id, RenderContextData.Region region) {
+        RenderContextData resolved = base != null ? base : RenderContextData.demoDefault();
+        Map<Integer, List<RenderContextData.Region>> regions = resolved.alwaysRenderRegions != null
+                ? new HashMap<>(resolved.alwaysRenderRegions)
+                : new HashMap<>();
+        List<RenderContextData.Region> list = regions.computeIfAbsent(id, k -> new ArrayList<>());
+        list = new ArrayList<>(list);
+        list.add(region);
+        regions.put(id, list);
+        return new RenderContextData(
+                resolved.enabled,
+                resolved.chunkXZRadius,
+                resolved.chunkYRadius,
+                resolved.renderAllWater,
+                resolved.renderAllLava,
+                regions
+        );
+    }
+
+    private RenderContextData withRemovedRegion(RenderContextData base, int id) {
+        RenderContextData resolved = base != null ? base : RenderContextData.demoDefault();
+        Map<Integer, List<RenderContextData.Region>> regions = resolved.alwaysRenderRegions != null
+                ? new HashMap<>(resolved.alwaysRenderRegions)
+                : new HashMap<>();
+        regions.remove(id);
         return new RenderContextData(
                 resolved.enabled,
                 resolved.chunkXZRadius,

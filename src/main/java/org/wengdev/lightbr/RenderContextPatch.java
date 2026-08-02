@@ -3,7 +3,7 @@ package org.wengdev.lightbr;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.phys.Vec3;
 
-import java.util.List;
+import java.util.*;
 
 public record RenderContextPatch(
         Boolean isEnabled,
@@ -11,7 +11,7 @@ public record RenderContextPatch(
         Integer chunkYRadius,
         Boolean renderAllWater,
         Boolean renderAllLava,
-        List<Tuple<Vec3, Vec3>> alwaysRenderRegions
+        Map<Integer, List<Tuple<Vec3, Vec3>>> alwaysRenderRegions
 ) {
     public static RenderContextPatch EMPTY = new RenderContextPatch(null, null, null, null, null, null);
 
@@ -35,16 +35,50 @@ public record RenderContextPatch(
         return new RenderContextPatch(isEnabled, chunkXZRadius, chunkYRadius, renderAllWater, value, alwaysRenderRegions);
     }
 
-    public RenderContextPatch withAlwaysRenderRegions(List<Tuple<Vec3, Vec3>> value) {
-        return new RenderContextPatch(isEnabled, chunkXZRadius, chunkYRadius, renderAllWater, renderAllLava, value);
+    public RenderContextPatch withSetAlwaysRenderRegions(int id, List<Tuple<Vec3, Vec3>> regions) {
+        Map<Integer, List<Tuple<Vec3, Vec3>>> newMap = alwaysRenderRegions != null
+                ? new HashMap<>(alwaysRenderRegions)
+                : new HashMap<>();
+        newMap.put(id, regions);
+        return new RenderContextPatch(isEnabled, chunkXZRadius, chunkYRadius, renderAllWater, renderAllLava, newMap);
+    }
+
+    public RenderContextPatch withAddAlwaysRenderRegions(int id, List<Tuple<Vec3, Vec3>> regions) {
+        Map<Integer, List<Tuple<Vec3, Vec3>>> newMap = alwaysRenderRegions != null
+                ? new HashMap<>(alwaysRenderRegions)
+                : new HashMap<>();
+        List<Tuple<Vec3, Vec3>> existing = newMap.get(id);
+        if (existing != null) {
+            List<Tuple<Vec3, Vec3>> combined = new ArrayList<>(existing);
+            combined.addAll(regions);
+            newMap.put(id, combined);
+        } else {
+            newMap.put(id, regions);
+        }
+        return new RenderContextPatch(isEnabled, chunkXZRadius, chunkYRadius, renderAllWater, renderAllLava, newMap);
+    }
+
+    public RenderContextPatch withRemoveAlwaysRenderRegions(int id) {
+        if (alwaysRenderRegions == null) return this;
+        Map<Integer, List<Tuple<Vec3, Vec3>>> newMap = new HashMap<>(alwaysRenderRegions);
+        newMap.remove(id);
+        return new RenderContextPatch(isEnabled, chunkXZRadius, chunkYRadius, renderAllWater, renderAllLava, newMap);
     }
 
     public RenderContext merge(RenderContext defaults) {
+        List<Tuple<Vec3, Vec3>> regions;
+        if (alwaysRenderRegions != null) {
+            regions = alwaysRenderRegions.values().stream()
+                    .flatMap(List::stream)
+                    .toList();
+        } else {
+            regions = defaults.alwaysRenderRegions;
+        }
         return new RenderContext(
                 isEnabled != null ? isEnabled : defaults.isEnabled,
                 chunkXZRadius != null ? chunkXZRadius : defaults.chunkXZRadius,
                 chunkYRadius != null ? chunkYRadius : defaults.chunkYRadius,
-                alwaysRenderRegions != null ? List.copyOf(alwaysRenderRegions) : defaults.alwaysRenderRegions,
+                regions,
                 renderAllWater != null ? renderAllWater : defaults.renderAllWater,
                 renderAllLava != null ? renderAllLava : defaults.renderAllLava
         );

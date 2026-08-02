@@ -5,6 +5,7 @@ import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.minecraft.network.FriendlyByteBuf;
 import org.wengdev.lightbr.network.handler.settings.*;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class SettingsPayloadHandlers {
@@ -16,17 +17,26 @@ public class SettingsPayloadHandlers {
     public static final int SET_ALWAYS_RENDER_REGIONS = 6;
     public static final int RESET_CACHE = 7;
     public static final int RESET_SETTINGS = 8;
+    public static final int BULK_SET_CONTEXT = 9;
+    public static final int ADD_ALWAYS_RENDER_REGIONS = 10;
+    public static final int REMOVE_ALWAYS_RENDER_REGIONS = 11;
 
-    private final Map<Integer, PayloadHandler> handlers = Map.of(
-            SET_ENABLED, new SetEnabledHandler(),
-            SET_RENDER_ALL_WATER, new SetRenderAllWaterHandler(),
-            SET_CHUNK_XZ, new SetChunkXZHandler(),
-            SET_CHUNK_Y, new SetChunkYHandler(),
-            SET_RENDER_ALL_LAVA, new SetRenderAllLavaHandler(),
-            SET_ALWAYS_RENDER_REGIONS, new SetAlwaysRenderRegionsHandler(),
-            RESET_CACHE, new ResetCacheHandler(),
-            RESET_SETTINGS, new ResetSettingsHandler()
-    );
+    private final Map<Integer, PayloadHandler> handlers;
+
+    public SettingsPayloadHandlers() {
+        handlers = new HashMap<>();
+        handlers.put(SET_ENABLED, new SetEnabledHandler());
+        handlers.put(SET_RENDER_ALL_WATER, new SetRenderAllWaterHandler());
+        handlers.put(SET_CHUNK_XZ, new SetChunkXZHandler());
+        handlers.put(SET_CHUNK_Y, new SetChunkYHandler());
+        handlers.put(SET_RENDER_ALL_LAVA, new SetRenderAllLavaHandler());
+        handlers.put(SET_ALWAYS_RENDER_REGIONS, new SetAlwaysRenderRegionsHandler());
+        handlers.put(RESET_CACHE, new ResetCacheHandler());
+        handlers.put(RESET_SETTINGS, new ResetSettingsHandler());
+        handlers.put(BULK_SET_CONTEXT, new BulkSetContextHandler(handlers));
+        handlers.put(ADD_ALWAYS_RENDER_REGIONS, new AddAlwaysRenderRegionsHandler());
+        handlers.put(REMOVE_ALWAYS_RENDER_REGIONS, new RemoveAlwaysRenderRegionsHandler());
+    }
 
     public void registerChannels() {
         PayloadTypeRegistry.playC2S().register(SettingsPayload.ID, SettingsPayload.CODEC);

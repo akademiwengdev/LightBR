@@ -10,7 +10,7 @@ import org.wengdev.lightbr.network.PayloadHandler;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SetAlwaysRenderRegionsHandler implements PayloadHandler {
+public class AddAlwaysRenderRegionsHandler implements PayloadHandler {
     @Override
     public void handle(FriendlyByteBuf buf, ClientPlayNetworking.Context context) {
         int id = buf.readVarInt();
@@ -22,6 +22,6 @@ public class SetAlwaysRenderRegionsHandler implements PayloadHandler {
             regions.add(new Tuple<>(a, b));
         }
         List<Tuple<Vec3, Vec3>> resolved = List.copyOf(regions);
-        ServerControlManager.queueServerOverride(patch -> patch.withSetAlwaysRenderRegions(id, resolved));
+        ServerControlManager.queueServerOverride(patch -> patch.withAddAlwaysRenderRegions(id, resolved));
     }
 }

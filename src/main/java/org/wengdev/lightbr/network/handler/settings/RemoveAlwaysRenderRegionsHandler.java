@@ -5,10 +5,10 @@ import net.minecraft.network.FriendlyByteBuf;
 import org.wengdev.lightbr.ServerControlManager;
 import org.wengdev.lightbr.network.PayloadHandler;
 
-public class SetRenderAllLavaHandler implements PayloadHandler {
+public class RemoveAlwaysRenderRegionsHandler implements PayloadHandler {
     @Override
     public void handle(FriendlyByteBuf buf, ClientPlayNetworking.Context context) {
-        boolean value = buf.readBoolean();
-        ServerControlManager.queueServerOverride(patch -> patch.withRenderAllLava(value));
+        int id = buf.readVarInt();
+        ServerControlManager.queueServerOverride(patch -> patch.withRemoveAlwaysRenderRegions(id));
     }
 }

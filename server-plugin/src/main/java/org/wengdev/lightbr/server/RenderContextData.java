@@ -1,7 +1,9 @@
 package org.wengdev.lightbr.server;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class RenderContextData {
     public final Boolean enabled;
@@ -9,9 +11,9 @@ public class RenderContextData {
     public final Integer chunkYRadius;
     public final Boolean renderAllWater;
     public final Boolean renderAllLava;
-    public final List<Region> alwaysRenderRegions;
+    public final Map<Integer, List<Region>> alwaysRenderRegions;
 
-    public RenderContextData(Boolean enabled, Integer chunkXZRadius, Integer chunkYRadius, Boolean renderAllWater, Boolean renderAllLava, List<Region> alwaysRenderRegions) {
+    public RenderContextData(Boolean enabled, Integer chunkXZRadius, Integer chunkYRadius, Boolean renderAllWater, Boolean renderAllLava, Map<Integer, List<Region>> alwaysRenderRegions) {
         this.enabled = enabled;
         this.chunkXZRadius = chunkXZRadius;
         this.chunkYRadius = chunkYRadius;
@@ -27,7 +29,7 @@ public class RenderContextData {
                 1,
                 true,
                 true,
-                new ArrayList<>()
+                new HashMap<>()
         );
     }
 
