@@ -6,8 +6,6 @@
   "plugin": "org.wengdev.lightbr.plugin.LightBRMixinPlugin",
   "client": [
     "BlockRenderManagerMixin",
-    "obu.MutableContextMixin",
-    "obu.OpenBoatUtilsMixin",
     "sodium.SodiumBlockRendererMixin",
     "sodium.SodiumFluidRendererMixin",
     "vulkanmod.VulkanModBlockRendererMixin",

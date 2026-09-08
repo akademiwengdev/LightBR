@@ -27,10 +27,6 @@ public class LightBRMixinPlugin implements IMixinConfigPlugin {
             return FabricLoader.getInstance().isModLoaded("vulkanmod");
         }
 
-        if (mixinClassName.contains(".obu.")) {
-            return FabricLoader.getInstance().isModLoaded("openboatutils");
-        }
-
         return true;
     }
 

@@ -26,6 +26,7 @@ import java.util.Properties;
 
 public class LightBR implements ClientModInitializer {
     private static final int DEFAULT_PROTOCOL_VERSION = 4;
+    public static final float DEFAULT_BLOCK_SLIPPERINESS = 0.6f;
     public static final Logger LOGGER = LogUtils.getLogger();
 
     public static LightBRConfig config;
@@ -33,7 +34,6 @@ public class LightBR implements ClientModInitializer {
 
     public static HashMap<String, Float> defaultSlipperinessMap = null;
 
-    private static final float DEFAULT_BLOCK_SLIPPERINESS = 0.6f;
     //? if 1.21.11 {
     /*private static final KeyMapping.Category KEY_CATEGORY = KeyMapping.Category.register(ResourceLocation.fromNamespaceAndPath("lightbr", "category"));
     *///? } elif 1.21.4 {

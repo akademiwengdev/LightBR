@@ -4,10 +4,18 @@ import dev.o7moon.openboatutils.ISettingContext;
 import dev.o7moon.openboatutils.OpenBoatUtils;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
+import org.wengdev.lightbr.LightBR;
 
 public class OBUFetcher {
     public static boolean isIsDefaultSlipperinessSet() {
-        return ObuSlipperinessState.isDefaultSlipperinessSet();
+        ISettingContext context = OpenBoatUtils.instance.getActiveContext();
+        if (context == null) {
+            return false;
+        }
+
+        return Float.compare(
+            context.getDefaultSlipperiness(), LightBR.DEFAULT_BLOCK_SLIPPERINESS
+        ) != 0;
     }
 
     public static boolean doesOBUInstanceExist() {
