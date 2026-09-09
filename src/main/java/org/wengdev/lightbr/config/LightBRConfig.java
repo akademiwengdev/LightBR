@@ -25,10 +25,10 @@ public class LightBRConfig {
     public int chunkYRadius = 1;
 
     @SerializedName("render_water")
-    public boolean renderAllWater = true;
+    public boolean renderAllWater = false;
 
     @SerializedName("render_lava")
-    public boolean renderAllLava = true;
+    public boolean renderAllLava = false;
 
     @SerializedName("auto_fix_incomplete_chunks")
     public boolean autoFixIncompleteChunks = false;

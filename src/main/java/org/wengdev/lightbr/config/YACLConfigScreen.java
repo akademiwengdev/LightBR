@@ -104,7 +104,7 @@ public class YACLConfigScreen extends YACLScreen {
                 .name(Component.translatable("lightbr.config.render_all_water.name"))
                 .description(OptionDescription.of(Component.translatable("lightbr.config.render_all_water.desc")))
                 .binding(
-                        true,
+                        false,
                         () -> LightBR.config.renderAllWater,
                         newValue -> LightBR.config.renderAllWater = newValue
                 )
@@ -116,7 +116,7 @@ public class YACLConfigScreen extends YACLScreen {
                 .name(Component.translatable("lightbr.config.render_all_lava.name"))
                 .description(OptionDescription.of(Component.translatable("lightbr.config.render_all_lava.desc")))
                 .binding(
-                        true,
+                        false,
                         () -> LightBR.config.renderAllLava,
                         newValue -> LightBR.config.renderAllLava = newValue
                 )
