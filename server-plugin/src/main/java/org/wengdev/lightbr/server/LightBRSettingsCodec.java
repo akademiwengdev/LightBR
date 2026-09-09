@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 public final class LightBRSettingsCodec {
+    public static final int PROTOCOL_VERSION = 6;
     public static final int CONFIG_PACKET_ACK = 0;
 
     public static final int PACKET_SET_ENABLED = 1;
@@ -21,6 +22,7 @@ public final class LightBRSettingsCodec {
     public static final int PACKET_BULK_SET_CONTEXT = 9;
     public static final int PACKET_ADD_ALWAYS_RENDER_REGIONS = 10;
     public static final int PACKET_REMOVE_ALWAYS_RENDER_REGIONS = 11;
+    public static final int PACKET_SET_AUTO_FIX_INCOMPLETE_CHUNKS = 12;
 
     private LightBRSettingsCodec() {
     }

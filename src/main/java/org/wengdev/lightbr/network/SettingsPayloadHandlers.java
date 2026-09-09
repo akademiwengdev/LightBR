@@ -20,6 +20,7 @@ public class SettingsPayloadHandlers {
     public static final int BULK_SET_CONTEXT = 9;
     public static final int ADD_ALWAYS_RENDER_REGIONS = 10;
     public static final int REMOVE_ALWAYS_RENDER_REGIONS = 11;
+    public static final int SET_AUTO_FIX_INCOMPLETE_CHUNKS = 12;
 
     private final Map<Integer, PayloadHandler> handlers;
 
@@ -36,6 +37,7 @@ public class SettingsPayloadHandlers {
         handlers.put(BULK_SET_CONTEXT, new BulkSetContextHandler(handlers));
         handlers.put(ADD_ALWAYS_RENDER_REGIONS, new AddAlwaysRenderRegionsHandler());
         handlers.put(REMOVE_ALWAYS_RENDER_REGIONS, new RemoveAlwaysRenderRegionsHandler());
+        handlers.put(SET_AUTO_FIX_INCOMPLETE_CHUNKS, new SetAutoFixIncompleteChunksHandler());
     }
 
     public void registerChannels() {

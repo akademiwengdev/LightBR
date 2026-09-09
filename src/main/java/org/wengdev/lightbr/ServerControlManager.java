@@ -86,6 +86,10 @@ public class ServerControlManager {
         return serverContextPatch != null && serverContextPatch.renderAllLava() != null;
     }
 
+    public static boolean isAutoFixIncompleteChunksServerControlled() {
+        return serverContextPatch != null && serverContextPatch.autoFixIncompleteChunks() != null;
+    }
+
     public static boolean isAlwaysRenderRegionsServerControlled() {
         return serverContextPatch != null && serverContextPatch.alwaysRenderRegions() != null;
     }

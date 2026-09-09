@@ -124,16 +124,7 @@ public class YACLConfigScreen extends YACLScreen {
                 .build()
         );
 
-        return defaultSettingsGroup.build();
-    }
-
-    private static OptionGroup createExperimentalGroup() {
-        final OptionGroup.Builder experimentalGroup = OptionGroup.createBuilder();
-        experimentalGroup.name(Component.translatable("lightbr.config.experimental_group.name"));
-        experimentalGroup.description(OptionDescription.of(Component.translatable("lightbr.config.experimental_group.desc")));
-        experimentalGroup.collapsed(false);
-
-        experimentalGroup.option(Option.<Boolean>createBuilder()
+        defaultSettingsGroup.option(Option.<Boolean>createBuilder()
                 .name(Component.translatable("lightbr.config.auto_fix_incomplete_chunks.name"))
                 .description(OptionDescription.of(Component.translatable("lightbr.config.auto_fix_incomplete_chunks.desc")))
                 .binding(
@@ -142,6 +133,23 @@ public class YACLConfigScreen extends YACLScreen {
                         newValue -> LightBR.config.autoFixIncompleteChunks = newValue
                 )
                 .controller(TickBoxControllerBuilder::create)
+                .build()
+        );
+
+        return defaultSettingsGroup.build();
+    }
+
+    private static OptionGroup createExperimentalGroup() {
+        final OptionGroup.Builder experimentalGroup = OptionGroup.createBuilder();
+        experimentalGroup.name(Component.translatable("lightbr.config.experimental_group.name"));
+        experimentalGroup.description(OptionDescription.of(Component.translatable("lightbr.config.experimental_group.desc")));
+        experimentalGroup.collapsed(true);
+
+        experimentalGroup.option(ButtonOption.createBuilder()
+                .name(Component.translatable("lightbr.config.experimental_group.empty"))
+                .text(Component.empty())
+                .available(false)
+                .action((screen, option) -> {})
                 .build()
         );
 
@@ -196,6 +204,15 @@ public class YACLConfigScreen extends YACLScreen {
                 .name(Component.translatable("lightbr.config.applied.render_all_lava.name"))
                 .description(OptionDescription.of(Component.translatable("lightbr.config.applied.render_all_lava.desc")))
                 .text(appliedValueText(ServerControlManager.isRenderAllLavaServerControlled(), appliedValueBooleanText(renderContext.renderAllLava)))
+                .available(false)
+                .action((screen, option) -> {})
+                .build()
+        );
+
+        appliedValuesGroup.option(ButtonOption.createBuilder()
+                .name(Component.translatable("lightbr.config.applied.auto_fix_incomplete_chunks.name"))
+                .description(OptionDescription.of(Component.translatable("lightbr.config.applied.auto_fix_incomplete_chunks.desc")))
+                .text(appliedValueText(ServerControlManager.isAutoFixIncompleteChunksServerControlled(), appliedValueBooleanText(renderContext.autoFixIncompleteChunks)))
                 .available(false)
                 .action((screen, option) -> {})
                 .build()

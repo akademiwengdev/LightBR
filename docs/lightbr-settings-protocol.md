@@ -4,6 +4,7 @@ This document specifies the custom payload protocol used to control LightBR rend
 
 ## Overview
 
+- Current protocol version: `6`
 - Config Channel: `lightbr:config`
 - Settings Channel: `lightbr:settings`
 - Direction:
@@ -35,6 +36,7 @@ This document specifies the custom payload protocol used to control LightBR rend
 | 9  | BULK_SET_CONTEXT | S2C | varint count + sub-packets |
 | 10 | ADD_ALWAYS_RENDER_REGIONS | S2C | varint id + list of regions |
 | 11 | REMOVE_ALWAYS_RENDER_REGIONS | S2C | varint id |
+| 12 | SET_AUTO_FIX_INCOMPLETE_CHUNKS | S2C | boolean |
 
 Notes:
 - The client sends `ACK` once on join over `lightbr:config`. This packet contains the protocol version client used.
@@ -75,6 +77,7 @@ Payload layouts:
 - `BULK_SET_CONTEXT`: `varint count` + `SubPacket * count`
 - `ADD_ALWAYS_RENDER_REGIONS`: `varint id` + `varint count` + `Region * count`
 - `REMOVE_ALWAYS_RENDER_REGIONS`: `varint id`
+- `SET_AUTO_FIX_INCOMPLETE_CHUNKS`: `boolean value`
 
 ### Region Layout
 
@@ -131,5 +134,6 @@ On the client, all region lists are flattened into a single list for rendering. 
 
 - Server encoder: `server-plugin/src/main/java/org/wengdev/lightbr/server/LightBRSettingsCodec.java`
 - Server handler: `server-plugin/src/main/java/org/wengdev/lightbr/server/LightBRServerPlugin.java`
-- Client handler: `src/main/java/org/wengdev/lightbr/LightBR.java`
+- Client lifecycle and ACK handling: `src/main/java/org/wengdev/lightbr/LightBR.java`
+- Client settings registry: `src/main/java/org/wengdev/lightbr/network/SettingsPayloadHandlers.java`
 - Payload wrappers: `src/main/java/org/wengdev/lightbr/network/SettingsPayload.java`, `src/main/java/org/wengdev/lightbr/network/ConfigPayload.java`

@@ -54,7 +54,11 @@ public class LightBRServerPlugin extends JavaPlugin implements PluginMessageList
             int packetType = readVarInt(in);
             if (CONFIG_CHANNEL.equals(channel) && packetType == LightBRSettingsCodec.CONFIG_PACKET_ACK) {
                 this.getLogger().info("Received config ACK from " + player.getName());
-                readVarInt(in);
+                int protocolVersion = readVarInt(in);
+                if (protocolVersion != LightBRSettingsCodec.PROTOCOL_VERSION) {
+                    this.getLogger().warning("Unsupported LightBR protocol version " + protocolVersion + " from " + player.getName());
+                    return;
+                }
                 Bukkit.getScheduler().runTaskLater(this, () -> {
                     if (!player.isOnline()) {
                         return;
@@ -80,7 +84,7 @@ public class LightBRServerPlugin extends JavaPlugin implements PluginMessageList
         }
 
         if (args.length == 0) {
-            sender.sendMessage("Usage: /lightbrsettings <setcontext|resetcache|addregion|setregion|removeregion> ...");
+            sender.sendMessage("Usage: /lightbrsettings <setcontext|resetcache|resetsettings|addregion|setregion|removeregion> ...");
             return true;
         }
 
@@ -106,6 +110,15 @@ public class LightBRServerPlugin extends JavaPlugin implements PluginMessageList
                 }
                 sendResetCache(target);
                 sender.sendMessage("Sent RESET_CACHE to " + target.getName());
+            }
+            case "resetsettings" -> {
+                Player target = resolveTargetPlayer(sender, args);
+                if (target == null) {
+                    sender.sendMessage("Player not found.");
+                    return true;
+                }
+                sendResetSettings(target);
+                sender.sendMessage("Sent RESET_SETTINGS to " + target.getName());
             }
             case "setregion" -> {
                 if (args.length < 3) {
@@ -166,7 +179,7 @@ public class LightBRServerPlugin extends JavaPlugin implements PluginMessageList
                 currentContext = withRemovedRegion(currentContext, id);
                 sender.sendMessage("Removed always-render region list " + id + " from context.");
             }
-            default -> sender.sendMessage("Unknown subcommand. Use setcontext, resetcache, setregion, addregion, or removeregion.");
+            default -> sender.sendMessage("Unknown subcommand. Use setcontext, resetcache, resetsettings, setregion, addregion, or removeregion.");
         }
 
         return true;
@@ -177,6 +190,7 @@ public class LightBRServerPlugin extends JavaPlugin implements PluginMessageList
         Boolean enabled = base.enabled;
         Integer chunkXZ = base.chunkXZRadius;
         Integer chunkY = base.chunkYRadius;
+        Boolean autoFixIncompleteChunks = base.autoFixIncompleteChunks;
 
         if (args.length >= 3) {
             enabled = parseBooleanOrNull(args[2], enabled);
@@ -187,6 +201,9 @@ public class LightBRServerPlugin extends JavaPlugin implements PluginMessageList
         if (args.length >= 5) {
             chunkY = parseIntOrNull(args[4], chunkY);
         }
+        if (args.length >= 6) {
+            autoFixIncompleteChunks = parseBooleanOrNull(args[5], autoFixIncompleteChunks);
+        }
 
         return new RenderContextData(
                 enabled,
@@ -194,6 +211,7 @@ public class LightBRServerPlugin extends JavaPlugin implements PluginMessageList
                 chunkY,
                 base.renderAllWater,
                 base.renderAllLava,
+                autoFixIncompleteChunks,
                 base.alwaysRenderRegions
         );
     }
@@ -258,6 +276,9 @@ public class LightBRServerPlugin extends JavaPlugin implements PluginMessageList
         }
         if (context.renderAllLava != null) {
             subPackets.add(LightBRSettingsCodec.encodeBooleanPacket(LightBRSettingsCodec.PACKET_SET_RENDER_ALL_LAVA, context.renderAllLava));
+        }
+        if (context.autoFixIncompleteChunks != null) {
+            subPackets.add(LightBRSettingsCodec.encodeBooleanPacket(LightBRSettingsCodec.PACKET_SET_AUTO_FIX_INCOMPLETE_CHUNKS, context.autoFixIncompleteChunks));
         }
         if (context.alwaysRenderRegions != null) {
             for (Map.Entry<Integer, List<RenderContextData.Region>> entry : context.alwaysRenderRegions.entrySet()) {
@@ -350,6 +371,7 @@ public class LightBRServerPlugin extends JavaPlugin implements PluginMessageList
                 resolved.chunkYRadius,
                 resolved.renderAllWater,
                 resolved.renderAllLava,
+                resolved.autoFixIncompleteChunks,
                 regions
         );
     }
@@ -369,6 +391,7 @@ public class LightBRServerPlugin extends JavaPlugin implements PluginMessageList
                 resolved.chunkYRadius,
                 resolved.renderAllWater,
                 resolved.renderAllLava,
+                resolved.autoFixIncompleteChunks,
                 regions
         );
     }
@@ -385,6 +408,7 @@ public class LightBRServerPlugin extends JavaPlugin implements PluginMessageList
                 resolved.chunkYRadius,
                 resolved.renderAllWater,
                 resolved.renderAllLava,
+                resolved.autoFixIncompleteChunks,
                 regions
         );
     }

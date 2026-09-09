@@ -11,28 +11,33 @@ public record RenderContextPatch(
         Integer chunkYRadius,
         Boolean renderAllWater,
         Boolean renderAllLava,
+        Boolean autoFixIncompleteChunks,
         Map<Integer, List<Tuple<Vec3, Vec3>>> alwaysRenderRegions
 ) {
-    public static RenderContextPatch EMPTY = new RenderContextPatch(null, null, null, null, null, null);
+    public static final RenderContextPatch EMPTY = new RenderContextPatch(null, null, null, null, null, null, null);
 
     public RenderContextPatch withEnabled(Boolean value) {
-        return new RenderContextPatch(value, chunkXZRadius, chunkYRadius, renderAllWater, renderAllLava, alwaysRenderRegions);
+        return new RenderContextPatch(value, chunkXZRadius, chunkYRadius, renderAllWater, renderAllLava, autoFixIncompleteChunks, alwaysRenderRegions);
     }
 
     public RenderContextPatch withChunkXZRadius(Integer value) {
-        return new RenderContextPatch(isEnabled, value, chunkYRadius, renderAllWater, renderAllLava, alwaysRenderRegions);
+        return new RenderContextPatch(isEnabled, value, chunkYRadius, renderAllWater, renderAllLava, autoFixIncompleteChunks, alwaysRenderRegions);
     }
 
     public RenderContextPatch withChunkYRadius(Integer value) {
-        return new RenderContextPatch(isEnabled, chunkXZRadius, value, renderAllWater, renderAllLava, alwaysRenderRegions);
+        return new RenderContextPatch(isEnabled, chunkXZRadius, value, renderAllWater, renderAllLava, autoFixIncompleteChunks, alwaysRenderRegions);
     }
 
     public RenderContextPatch withRenderAllWater(Boolean value) {
-        return new RenderContextPatch(isEnabled, chunkXZRadius, chunkYRadius, value, renderAllLava, alwaysRenderRegions);
+        return new RenderContextPatch(isEnabled, chunkXZRadius, chunkYRadius, value, renderAllLava, autoFixIncompleteChunks, alwaysRenderRegions);
     }
 
     public RenderContextPatch withRenderAllLava(Boolean value) {
-        return new RenderContextPatch(isEnabled, chunkXZRadius, chunkYRadius, renderAllWater, value, alwaysRenderRegions);
+        return new RenderContextPatch(isEnabled, chunkXZRadius, chunkYRadius, renderAllWater, value, autoFixIncompleteChunks, alwaysRenderRegions);
+    }
+
+    public RenderContextPatch withAutoFixIncompleteChunks(Boolean value) {
+        return new RenderContextPatch(isEnabled, chunkXZRadius, chunkYRadius, renderAllWater, renderAllLava, value, alwaysRenderRegions);
     }
 
     public RenderContextPatch withSetAlwaysRenderRegions(int id, List<Tuple<Vec3, Vec3>> regions) {
@@ -40,7 +45,7 @@ public record RenderContextPatch(
                 ? new HashMap<>(alwaysRenderRegions)
                 : new HashMap<>();
         newMap.put(id, regions);
-        return new RenderContextPatch(isEnabled, chunkXZRadius, chunkYRadius, renderAllWater, renderAllLava, newMap);
+        return new RenderContextPatch(isEnabled, chunkXZRadius, chunkYRadius, renderAllWater, renderAllLava, autoFixIncompleteChunks, newMap);
     }
 
     public RenderContextPatch withAddAlwaysRenderRegions(int id, List<Tuple<Vec3, Vec3>> regions) {
@@ -55,14 +60,14 @@ public record RenderContextPatch(
         } else {
             newMap.put(id, regions);
         }
-        return new RenderContextPatch(isEnabled, chunkXZRadius, chunkYRadius, renderAllWater, renderAllLava, newMap);
+        return new RenderContextPatch(isEnabled, chunkXZRadius, chunkYRadius, renderAllWater, renderAllLava, autoFixIncompleteChunks, newMap);
     }
 
     public RenderContextPatch withRemoveAlwaysRenderRegions(int id) {
         if (alwaysRenderRegions == null) return this;
         Map<Integer, List<Tuple<Vec3, Vec3>>> newMap = new HashMap<>(alwaysRenderRegions);
         newMap.remove(id);
-        return new RenderContextPatch(isEnabled, chunkXZRadius, chunkYRadius, renderAllWater, renderAllLava, newMap);
+        return new RenderContextPatch(isEnabled, chunkXZRadius, chunkYRadius, renderAllWater, renderAllLava, autoFixIncompleteChunks, newMap);
     }
 
     public RenderContext merge(RenderContext defaults) {
@@ -80,7 +85,8 @@ public record RenderContextPatch(
                 chunkYRadius != null ? chunkYRadius : defaults.chunkYRadius,
                 regions,
                 renderAllWater != null ? renderAllWater : defaults.renderAllWater,
-                renderAllLava != null ? renderAllLava : defaults.renderAllLava
+                renderAllLava != null ? renderAllLava : defaults.renderAllLava,
+                autoFixIncompleteChunks != null ? autoFixIncompleteChunks : defaults.autoFixIncompleteChunks
         );
     }
 }

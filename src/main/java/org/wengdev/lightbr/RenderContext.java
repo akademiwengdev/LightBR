@@ -15,13 +15,15 @@ public class RenderContext {
 
     public final boolean renderAllWater;
     public final boolean renderAllLava;
+    public final boolean autoFixIncompleteChunks;
 
-    public RenderContext(boolean isEnabled, int chunkXZRadius, int chunkYRadius, List<Tuple<Vec3, Vec3>> alwaysRenderRegions, boolean renderAllWater, boolean renderAllLava) {
+    public RenderContext(boolean isEnabled, int chunkXZRadius, int chunkYRadius, List<Tuple<Vec3, Vec3>> alwaysRenderRegions, boolean renderAllWater, boolean renderAllLava, boolean autoFixIncompleteChunks) {
         this.isEnabled = isEnabled;
         this.chunkXZRadius = chunkXZRadius;
         this.chunkYRadius = chunkYRadius;
         this.alwaysRenderRegions = alwaysRenderRegions;
         this.renderAllWater = renderAllWater;
         this.renderAllLava = renderAllLava;
+        this.autoFixIncompleteChunks = autoFixIncompleteChunks;
     }
 }

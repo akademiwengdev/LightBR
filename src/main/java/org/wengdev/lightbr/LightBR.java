@@ -25,7 +25,7 @@ import java.util.HashMap;
 import java.util.Properties;
 
 public class LightBR implements ClientModInitializer {
-    private static final int DEFAULT_PROTOCOL_VERSION = 4;
+    private static final int DEFAULT_PROTOCOL_VERSION = 6;
     public static final float DEFAULT_BLOCK_SLIPPERINESS = 0.6f;
     public static final Logger LOGGER = LogUtils.getLogger();
 
@@ -161,7 +161,7 @@ public class LightBR implements ClientModInitializer {
                 client.setScreen(new org.wengdev.lightbr.config.YACLConfigScreen(client.screen));
             }
 
-            if (config != null && config.autoFixIncompleteChunks && client.levelRenderer != null) {
+            if (RenderContextManager.get().autoFixIncompleteChunks) {
                 processPendingSections(client);
             }
 

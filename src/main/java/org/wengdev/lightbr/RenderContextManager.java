@@ -42,7 +42,8 @@ public class RenderContextManager {
                 config.chunkYRadius,
                 List.of(),
                 config.renderAllWater,
-                config.renderAllLava
+                config.renderAllLava,
+                config.autoFixIncompleteChunks
         );
     }
 }
