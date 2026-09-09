@@ -59,7 +59,13 @@ dependencies {
 
     // Use `mod{dependency type}` even on 26.1+ - loom-back-compat converts them
     modImplementation("net.fabricmc:fabric-loader:${property("deps.fabric_loader")}")
-    fapi("fabric-lifecycle-events-v1", "fabric-resource-loader-v0", "fabric-content-registries-v0", "fabric-registry-sync-v0")
+    fapi(
+        "fabric-lifecycle-events-v1",
+        "fabric-resource-loader-v0",
+        "fabric-content-registries-v0",
+        "fabric-registry-sync-v0",
+        "fabric-renderer-indigo"
+    )
 
     modImplementation("dev.isxander:yet-another-config-lib:${property("deps.yacl")}")
 
@@ -129,12 +135,7 @@ tasks {
         filesMatching("lightbr.properties") { expand(props) }
 
         val mixinJava = "JAVA_${requiredJava.majorVersion}"
-        val indigoMixin = if (sc.current.parsed < "1.21.11") {
-            "\"indigo.IndigoTerrainRendererMixin\","
-        } else {
-            ""
-        }
-        filesMatching("*.mixins.json") { expand("java" to mixinJava, "indigo_mixin" to indigoMixin) }
+        filesMatching("*.mixins.json") { expand("java" to mixinJava) }
     }
 
     register<Copy>("buildAndCollect") {
