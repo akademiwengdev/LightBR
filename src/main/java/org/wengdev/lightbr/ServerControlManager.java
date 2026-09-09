@@ -59,6 +59,8 @@ public class ServerControlManager {
 
     public static void clearServerControl() {
         serverContextPatch = null;
+        pendingUpdaters.clear();
+        pendingCacheReset = false;
         RenderContextManager.reloadRenderContext();
     }
 
