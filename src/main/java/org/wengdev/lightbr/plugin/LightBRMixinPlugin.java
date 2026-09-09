@@ -27,6 +27,10 @@ public class LightBRMixinPlugin implements IMixinConfigPlugin {
             return FabricLoader.getInstance().isModLoaded("vulkanmod");
         }
 
+        if (mixinClassName.contains(".indigo.")) {
+            return FabricLoader.getInstance().isModLoaded("fabric-renderer-indigo");
+        }
+
         return true;
     }
 

@@ -6,6 +6,7 @@
   "plugin": "org.wengdev.lightbr.plugin.LightBRMixinPlugin",
   "client": [
     "BlockRenderManagerMixin",
+    ${indigo_mixin}
     "sodium.SodiumBlockRendererMixin",
     "sodium.SodiumFluidRendererMixin",
     "vulkanmod.VulkanModBlockRendererMixin",

@@ -129,7 +129,12 @@ tasks {
         filesMatching("lightbr.properties") { expand(props) }
 
         val mixinJava = "JAVA_${requiredJava.majorVersion}"
-        filesMatching("*.mixins.json") { expand("java" to mixinJava) }
+        val indigoMixin = if (sc.current.parsed < "1.21.11") {
+            "\"indigo.IndigoTerrainRendererMixin\","
+        } else {
+            ""
+        }
+        filesMatching("*.mixins.json") { expand("java" to mixinJava, "indigo_mixin" to indigoMixin) }
     }
 
     register<Copy>("buildAndCollect") {
