@@ -1,6 +1,8 @@
 package org.wengdev.lightbr;
 
+import net.minecraft.client.Minecraft;
 import org.wengdev.lightbr.config.LightBRConfig;
+import org.wengdev.lightbr.config.YACLConfigScreen;
 
 import java.util.List;
 
@@ -30,6 +32,10 @@ public class RenderContextManager {
             renderContext = ServerControlManager.serverContextPatch.merge(defaults);
         } else {
             renderContext = defaults;
+        }
+
+        if (Minecraft.getInstance().screen instanceof YACLConfigScreen configScreen) {
+            configScreen.refreshAppliedValues();
         }
 
         return renderContext;

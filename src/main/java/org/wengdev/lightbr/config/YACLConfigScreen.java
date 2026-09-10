@@ -3,24 +3,41 @@ package org.wengdev.lightbr.config;
 import dev.isxander.yacl3.api.*;
 import dev.isxander.yacl3.api.controller.IntegerSliderControllerBuilder;
 import dev.isxander.yacl3.api.controller.TickBoxControllerBuilder;
+import dev.isxander.yacl3.api.utils.Dimension;
+import dev.isxander.yacl3.gui.AbstractWidget;
 import dev.isxander.yacl3.gui.YACLScreen;
+import dev.isxander.yacl3.gui.controllers.ControllerWidget;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import org.wengdev.lightbr.LightBR;
-import org.wengdev.lightbr.RenderContext;
 import org.wengdev.lightbr.RenderContextManager;
 import org.wengdev.lightbr.ServerControlManager;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Supplier;
+
 public class YACLConfigScreen extends YACLScreen {
+    private final AppliedValues appliedValues;
+
     public YACLConfigScreen(Screen parent) {
-        super(generateConfigScreen(), parent);
+        this(parent, new AppliedValues());
     }
 
-    public static YetAnotherConfigLib generateConfigScreen() {
+    private YACLConfigScreen(Screen parent, AppliedValues appliedValues) {
+        super(generateConfigScreen(appliedValues), parent);
+        this.appliedValues = appliedValues;
+    }
+
+    public void refreshAppliedValues() {
+        appliedValues.refresh();
+    }
+
+    private static YetAnotherConfigLib generateConfigScreen(AppliedValues appliedValues) {
         final OptionGroup generalGroup = createGeneralGroup();
         final OptionGroup renderGroup = createDefaultSettingsGroup();
         final OptionGroup experimentalGroup = createExperimentalGroup();
-        final OptionGroup appliedValuesGroup = createAppliedValuesGroup();
+        final OptionGroup appliedValuesGroup = createAppliedValuesGroup(appliedValues);
 
         return YetAnotherConfigLib.createBuilder()
                 .title(Component.translatable("lightbr.config.title"))
@@ -156,80 +173,111 @@ public class YACLConfigScreen extends YACLScreen {
         return experimentalGroup.build();
     }
 
-    private static OptionGroup createAppliedValuesGroup() {
+    private static OptionGroup createAppliedValuesGroup(AppliedValues appliedValues) {
         final OptionGroup.Builder appliedValuesGroup = OptionGroup.createBuilder();
         appliedValuesGroup.name(Component.translatable("lightbr.config.applied_values_group.name"));
         appliedValuesGroup.description(OptionDescription.of(Component.translatable("lightbr.config.applied_values_group.desc")));
         appliedValuesGroup.collapsed(true);
 
-        RenderContext renderContext = RenderContextManager.get();
+        appliedValuesGroup.option(appliedValueOption(
+                appliedValues,
+                "lightbr.config.applied.enabled.name",
+                "lightbr.config.applied.enabled.desc",
+                () -> appliedValueText(ServerControlManager.isIsEnabledServerControlled(), appliedValueBooleanText(RenderContextManager.get().isEnabled))
+        ));
 
-        appliedValuesGroup.option(ButtonOption.createBuilder()
-                .name(Component.translatable("lightbr.config.applied.enabled.name"))
-                .description(OptionDescription.of(Component.translatable("lightbr.config.applied.enabled.desc")))
-                .text(appliedValueText(ServerControlManager.isIsEnabledServerControlled(), appliedValueBooleanText(renderContext.isEnabled)))
-                .available(false)
-                .action((screen, option) -> {})
-                .build()
-        );
+        appliedValuesGroup.option(appliedValueOption(
+                appliedValues,
+                "lightbr.config.applied.chunk_xz_radius.name",
+                "lightbr.config.applied.chunk_xz_radius.desc",
+                () -> appliedValueText(ServerControlManager.isChunkXZServerControlled(), RenderContextManager.get().chunkXZRadius)
+        ));
 
-        appliedValuesGroup.option(ButtonOption.createBuilder()
-                .name(Component.translatable("lightbr.config.applied.chunk_xz_radius.name"))
-                .description(OptionDescription.of(Component.translatable("lightbr.config.applied.chunk_xz_radius.desc")))
-                .text(appliedValueText(ServerControlManager.isChunkXZServerControlled(), renderContext.chunkXZRadius))
-                .available(false)
-                .action((screen, option) -> {})
-                .build()
-        );
+        appliedValuesGroup.option(appliedValueOption(
+                appliedValues,
+                "lightbr.config.applied.chunk_y_radius.name",
+                "lightbr.config.applied.chunk_y_radius.desc",
+                () -> appliedValueText(ServerControlManager.isChunkYServerControlled(), RenderContextManager.get().chunkYRadius)
+        ));
 
-        appliedValuesGroup.option(ButtonOption.createBuilder()
-                .name(Component.translatable("lightbr.config.applied.chunk_y_radius.name"))
-                .description(OptionDescription.of(Component.translatable("lightbr.config.applied.chunk_y_radius.desc")))
-                .text(appliedValueText(ServerControlManager.isChunkYServerControlled(), renderContext.chunkYRadius))
-                .available(false)
-                .action((screen, option) -> {})
-                .build()
-        );
+        appliedValuesGroup.option(appliedValueOption(
+                appliedValues,
+                "lightbr.config.applied.render_all_water.name",
+                "lightbr.config.applied.render_all_water.desc",
+                () -> appliedValueText(ServerControlManager.isRenderAllWaterServerControlled(), appliedValueBooleanText(RenderContextManager.get().renderAllWater))
+        ));
 
-        appliedValuesGroup.option(ButtonOption.createBuilder()
-                .name(Component.translatable("lightbr.config.applied.render_all_water.name"))
-                .description(OptionDescription.of(Component.translatable("lightbr.config.applied.render_all_water.desc")))
-                .text(appliedValueText(ServerControlManager.isRenderAllWaterServerControlled(), appliedValueBooleanText(renderContext.renderAllWater)))
-                .available(false)
-                .action((screen, option) -> {})
-                .build()
-        );
+        appliedValuesGroup.option(appliedValueOption(
+                appliedValues,
+                "lightbr.config.applied.render_all_lava.name",
+                "lightbr.config.applied.render_all_lava.desc",
+                () -> appliedValueText(ServerControlManager.isRenderAllLavaServerControlled(), appliedValueBooleanText(RenderContextManager.get().renderAllLava))
+        ));
 
-        appliedValuesGroup.option(ButtonOption.createBuilder()
-                .name(Component.translatable("lightbr.config.applied.render_all_lava.name"))
-                .description(OptionDescription.of(Component.translatable("lightbr.config.applied.render_all_lava.desc")))
-                .text(appliedValueText(ServerControlManager.isRenderAllLavaServerControlled(), appliedValueBooleanText(renderContext.renderAllLava)))
-                .available(false)
-                .action((screen, option) -> {})
-                .build()
-        );
+        appliedValuesGroup.option(appliedValueOption(
+                appliedValues,
+                "lightbr.config.applied.auto_fix_incomplete_chunks.name",
+                "lightbr.config.applied.auto_fix_incomplete_chunks.desc",
+                () -> appliedValueText(ServerControlManager.isAutoFixIncompleteChunksServerControlled(), appliedValueBooleanText(RenderContextManager.get().autoFixIncompleteChunks))
+        ));
 
-        appliedValuesGroup.option(ButtonOption.createBuilder()
-                .name(Component.translatable("lightbr.config.applied.auto_fix_incomplete_chunks.name"))
-                .description(OptionDescription.of(Component.translatable("lightbr.config.applied.auto_fix_incomplete_chunks.desc")))
-                .text(appliedValueText(ServerControlManager.isAutoFixIncompleteChunksServerControlled(), appliedValueBooleanText(renderContext.autoFixIncompleteChunks)))
-                .available(false)
-                .action((screen, option) -> {})
-                .build()
-        );
-
-        Component regionCountString = Component.translatable("lightbr.config.applied.always_render_regions.regions", renderContext.alwaysRenderRegions.size());
-
-        appliedValuesGroup.option(ButtonOption.createBuilder()
-                .name(Component.translatable("lightbr.config.applied.always_render_regions.name"))
-                .description(OptionDescription.of(Component.translatable("lightbr.config.applied.always_render_regions.desc")))
-                .text(appliedValueText(ServerControlManager.isAlwaysRenderRegionsServerControlled(), regionCountString))
-                .available(false)
-                .action((screen, option) -> {})
-                .build()
-        );
+        appliedValuesGroup.option(appliedValueOption(
+                appliedValues,
+                "lightbr.config.applied.always_render_regions.name",
+                "lightbr.config.applied.always_render_regions.desc",
+                () -> {
+                    Component regionCountString = Component.translatable("lightbr.config.applied.always_render_regions.regions", RenderContextManager.get().alwaysRenderRegions.size());
+                    return appliedValueText(ServerControlManager.isAlwaysRenderRegionsServerControlled(), regionCountString);
+                }
+        ));
 
         return appliedValuesGroup.build();
+    }
+
+    private static Option<Component> appliedValueOption(AppliedValues appliedValues, String nameKey, String descriptionKey, Supplier<Component> valueSupplier) {
+        Option<Component> option = Option.<Component>createBuilder()
+                .name(Component.translatable(nameKey))
+                .description(OptionDescription.of(Component.translatable(descriptionKey)))
+                .binding(valueSupplier.get(), valueSupplier, ignored -> {})
+                .customController(AppliedValueController::new)
+                .available(false)
+                .build();
+        appliedValues.add(option);
+        return option;
+    }
+
+    private record AppliedValueController(Option<Component> option) implements Controller<Component> {
+        @Override
+        public Component formatValue() {
+            return option.pendingValue();
+        }
+
+        @Override
+        public AbstractWidget provideWidget(YACLScreen screen, Dimension<Integer> dimension) {
+            return new ControllerWidget<>(this, screen, dimension) {
+                @Override
+                protected int getHoveredControlWidth() {
+                    return getUnhoveredControlWidth();
+                }
+
+                @Override
+                public boolean canReset() {
+                    return false;
+                }
+            };
+        }
+    }
+
+    private static final class AppliedValues {
+        private final List<Option<Component>> options = new ArrayList<>();
+
+        private void add(Option<Component> option) {
+            options.add(option);
+        }
+
+        private void refresh() {
+            options.forEach(option -> option.stateManager().sync());
+        }
     }
 
     private static Component appliedValueBooleanText(boolean bool) {
