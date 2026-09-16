@@ -51,8 +51,10 @@ public class LightBRConfig {
         Minecraft.getInstance().levelRenderer.allChanged();
     }
 
-    public void saveAndReloadWorldOnly() {
+    public void saveAndReloadContextAndWorldOnly() {
         save();
+
+        RenderContextManager.reloadRenderContext();
         Minecraft.getInstance().levelRenderer.allChanged();
     }
 

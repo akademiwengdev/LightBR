@@ -93,7 +93,7 @@ public class LightBR implements ClientModInitializer {
             return;
         }
         config.isEnabled = !config.isEnabled;
-        config.saveAndReloadWorldOnly();
+        config.saveAndReloadContextAndWorldOnly();
 
         if (client.player != null) {
             Component msg = Component.translatable(config.isEnabled ? "lightbr.actionbar.enabled" : "lightbr.actionbar.disabled");
