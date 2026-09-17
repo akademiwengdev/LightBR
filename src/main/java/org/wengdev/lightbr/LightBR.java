@@ -112,7 +112,9 @@ public class LightBR implements ClientModInitializer {
 
     private static void reloadWorldRenderer() {
         Minecraft client = Minecraft.getInstance();
-        client.levelRenderer.allChanged();
+        if (client.level != null) {
+            client.levelRenderer.allChanged();
+        }
     }
 
     private static void processPendingSections(Minecraft client) {
