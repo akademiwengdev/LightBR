@@ -126,10 +126,13 @@ public class LightBR implements ClientModInitializer {
             int sx = SectionPos.x(sectionPos);
             int sy = SectionPos.y(sectionPos);
             int sz = SectionPos.z(sectionPos);
-            client.levelRenderer.setBlocksDirty(
-                sx << 4, sy << 4, sz << 4,
-                (sx << 4) + 15, (sy << 4) + 15, (sz << 4) + 15
-            );
+
+            if (client.level != null) {
+                client.levelRenderer.setBlocksDirty(
+                    sx << 4, sy << 4, sz << 4,
+                    (sx << 4) + 15, (sy << 4) + 15, (sz << 4) + 15
+                );
+            }
         }
     }
 
